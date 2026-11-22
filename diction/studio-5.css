@@ -1,0 +1,40 @@
+
+.pk-view{max-width:1100px;margin:0 auto}
+.pk-view .pagehead{margin-bottom:1.6rem}
+.pk-view .pagehead h1{max-width:28ch}.pk-view .pagehead p{max-width:68ch}
+.pk-back{margin:0 0 1.1rem}.pk-bar,.pk-actions{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.pk-tabs{display:flex;gap:.3rem}.pk-tabs button{border:1px solid transparent;background:transparent;color:var(--muted);border-radius:99px;padding:.45rem .85rem}
+.pk-tabs button[aria-pressed=true]{background:#e3ebdf;border-color:#c2cebf;color:var(--green)}
+.pk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,245px),1fr));gap:.9rem;margin:1rem 0 1.3rem}
+.pk-tile{display:flex;flex-direction:column;align-items:flex-start;gap:.64rem;padding:1.2rem 1.3rem;text-align:left;background:var(--white);border:1px solid var(--line);min-height:145px;font-weight:400}
+.pk-tile:hover{background:#f1f4ed}.pk-tile strong{font:500 1.65rem/1.14 var(--serif);letter-spacing:-.03em;color:var(--ink)}
+.pk-desc{font-size:.96rem;color:#48594d}.pk-meta,.pk-k{color:var(--muted);font-size:.88rem}
+.pk-tile .pk-meta{padding-top:.4rem;margin-top:auto}.pk-detail{display:grid;grid-template-columns:1.2fr 1fr;gap:1rem;align-items:start}
+.pk-panel{max-width:53rem}.pk-panel h2{font-size:clamp(1.55rem,3vw,2.12rem);margin:0 0 1rem;line-height:1.15}
+.pk-panel .eyebrow{margin-bottom:.6rem}.pk-panel p,.pk-panel blockquote,.pk-panel .actions{margin:.85rem 0}
+.pk-view .actions{gap:.55rem}.pk-field{display:grid;gap:.35rem;font-size:.95rem;margin:1.1rem 0}.pk-field>span{font-weight:600}
+.pk-panel blockquote,.pk-journal blockquote{margin:1.1rem 0;padding:.2rem 0 .2rem 1rem;border-left:3px solid #b5bd98;font:italic 1.25rem/1.5 var(--serif);white-space:pre-wrap;overflow-wrap:anywhere}
+.pk-panel input,.pk-panel textarea{background:#fffefa}.pk-setting,.pk-contents{margin:1.1rem 0 0;border-top:1px solid var(--line);padding-top:.9rem}
+.pk-view summary{cursor:pointer;font-weight:600}.pk-view summary:focus-visible{outline:3px solid #b17843;outline-offset:3px}
+.pk-setting label{display:flex;align-items:center;gap:1rem;justify-content:space-between;margin:.85rem 0 0}.pk-setting select{width:5rem}
+.pk-entry{padding:.85rem 0;border-bottom:1px solid var(--line)}.pk-entry:last-child{border:0}.pk-entry strong{font:500 1.3rem var(--serif)}
+.pk-entry p{font-size:.95rem;margin:.28rem 0}.pk-entry button{font-size:.85rem;margin-top:.4rem;padding:.3rem .6rem}
+.pk-journal{margin-top:1.8rem;border-top:1px solid var(--line);padding-top:1.25rem}.pk-journal h2{margin-bottom:1rem}.pk-journal details{border-bottom:1px solid var(--line);padding:.8rem 0}.pk-journal .pk-k{font-weight:650;margin:.75rem 0 .15rem}
+.pk-study{max-width:47rem}.pk-study>button{margin-top:.7rem}.pk-study h2{line-height:1.2}.pk-view button,.pk-view p,.pk-view strong,.pk-view summary{overflow-wrap:anywhere}
+@media(max-width:700px){.pk-detail{grid-template-columns:1fr}.pk-bar{align-items:flex-start}.pk-tile{min-height:140px}}
+.pk-tile{border-radius:5px;color:var(--ink);text-decoration:none;transition:background-color .15s,border-color .15s}
+.pk-tile:hover{border-color:#94a596}
+.pk-filters{display:flex;align-items:center;gap:.7rem;border-top:1px solid var(--line);padding-top:1rem}
+.pk-filters label,.pk-pages label{font-weight:600}
+.pk-filters select{width:auto;max-width:100%}
+.pk-range{margin-left:auto;color:var(--muted);font-size:.9rem;font-variant-numeric:tabular-nums}
+.pk-pages{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:1rem;margin-top:1.5rem}
+.pk-pages form{display:flex;align-items:center;justify-content:center;gap:.55rem;flex-wrap:wrap}
+.pk-pages input[type=number]{width:7rem;padding:.5rem .6rem}
+.pk-pages form span{color:var(--muted)}
+.pk-more{margin-top:1rem}
+.pk-finder{display:grid;gap:.4rem;max-width:38rem;margin:1rem 0}
+.pk-finder label{font-weight:600}.pk-finder>div{display:flex;align-items:center;gap:.5rem}
+.pk-finder input{min-width:0;flex:1}.pk-finder button{flex:none}
+@media(max-width:600px){.pk-filters{flex-wrap:wrap}.pk-filters select{flex:1;min-width:10rem}.pk-range{width:100%;margin-left:0}.pk-pages form{order:1;width:100%}}
+

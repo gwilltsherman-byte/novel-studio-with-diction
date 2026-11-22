@@ -1,0 +1,28 @@
+
+.ql-dialog{width:min(32rem,calc(100% - 24px));max-height:min(38rem,85vh);overflow:auto;overscroll-behavior:contain;box-sizing:border-box;border:1px solid var(--line);border-radius:9px;padding:20px;background:var(--white);color:var(--ink);box-shadow:0 15px 60px #162e242b;position:fixed;inset:0;margin:auto;z-index:51}
+.ql-dialog:not([open]){display:none}
+.ql-dialog::backdrop,.ql-scrim{background:#192e2b60}
+.ql-scrim{position:fixed;inset:0;z-index:50}
+.ql-top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px}
+.ql-top h2,.ql-dialog h3{margin:0;font:500 1.65rem/1.2 var(--serif)}
+.ql-top .back{padding:.6rem}
+.ql-dialog label,.ql-related>p{font-size:.9rem;font-weight:600;display:block;margin:0 0 4px}
+.ql-dialog h3{margin-top:16px}
+.ql-dialog p{overflow-wrap:anywhere}
+.ql-senses{list-style:none;margin:0;padding:0}
+.ql-senses li{padding:12px 0;border-bottom:1px solid var(--line)}
+.ql-senses small,.ql-status{color:var(--muted);font-size:.82rem}
+.ql-senses p{margin:3px 0 8px}
+.ql-senses button,.ql-related button{min-height:40px}
+.ql-related{margin-top:14px}
+.ql-related div{display:flex;flex-wrap:wrap;gap:6px}
+.ql-related button{background:var(--paper);color:var(--ink);padding:.3rem .65rem}
+.ql-status{margin:9px 0 0}
+.ql-status:empty{display:none}
+@media(max-width:500px){.ql-dialog{padding:15px}.ql-related button,.ql-senses button,.ql-top button{min-height:44px}}
+.ql-scrim{background:#192e2b60}
+.ql-personal{margin:12px 0}
+.ql-personal summary{cursor:pointer;color:var(--green);text-decoration:underline;text-underline-offset:3px}
+.ql-personal form{margin-top:9px}
+.ql-personal textarea{min-height:4rem}
+

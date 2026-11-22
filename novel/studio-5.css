@@ -1,0 +1,8 @@
+
+.studio-rail>.brand,#novel-studio-inline .studio-rail>.brand{display:none}
+.studio-rail .book-switch,#novel-studio-inline .studio-rail .book-switch{margin-top:16px}
+
+.ms-word-tools{display:flex;flex-wrap:wrap;gap:.45rem .6rem;padding:.65rem clamp(1rem,3vw,2rem);border-top:1px solid var(--ms-line,#d7dbce)}
+.ms-word-tools .btn{padding:.4rem .7rem;font-size:.875rem;min-height:36px}
+@media(pointer:coarse){.ms-word-tools .btn{min-height:44px}}
+

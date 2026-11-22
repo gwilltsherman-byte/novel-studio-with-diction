@@ -1,0 +1,23 @@
+
+.coach-page{max-width:48rem;overflow-wrap:anywhere}
+.coach-page>.back{margin-bottom:1rem}
+.coach-study{border-top:2px solid var(--green);padding:clamp(1.3rem,3.4vw,2.5rem) 0 .5rem}
+.coach-study h1{margin:.45rem 0 .75rem}
+.coach-sense{font:1.36rem/1.45 var(--serif);margin:.45rem 0 1.2rem}
+.coach-study blockquote{border-left:2px solid var(--brass);margin:1.2rem 0;padding:.1rem 1rem;font:italic 1.25rem/1.5 var(--serif)}
+.coach-distinction{margin:1.4rem 0}
+.coach-distinction h2,.coach-why h2{font-size:1.3rem;margin-bottom:.3rem}
+.coach-why{border-top:1px solid var(--line);padding-top:1rem;margin-top:1.25rem;color:var(--muted)}
+.coach-optional{font-weight:400;color:var(--muted)}
+.coach-study textarea{min-height:4.5rem}
+.coach-study .notice{margin-bottom:1rem}
+.coach-rating{padding:0;margin:1rem 0 0;border:0}
+.coach-rating legend{padding:0;margin-bottom:.55rem;font-weight:600}
+.coach-status{margin-bottom:1rem;color:var(--green)}
+.coach-round-meter{display:flex;align-items:center;gap:.75rem;margin:.5rem 0 .8rem;color:var(--muted)}
+.coach-round-meter progress{width:5rem;height:.45rem;accent-color:var(--green)}
+.coach-round-summary h1{margin:.5rem 0 1rem}
+.coach-results{list-style:none;padding:0;margin:1rem 0}
+.coach-results li{display:flex;justify-content:space-between;flex-wrap:wrap;gap:.3rem 1rem;padding:.7rem 0;border-bottom:1px solid var(--line)}
+.coach-results span{color:var(--muted)}
+
