@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#20362b">
-  <title>Novel Studio · Writing and vocabulary</title>
+  <title>Novel Studio · Writing, vocabulary and lessons</title>
   <style>
     #combined-studio{--cs-ink:#213c30;--cs-paper:#f9f8f2;--cs-rule:#ccd3c5;display:block;isolation:isolate;background:var(--cs-paper);color:var(--cs-ink);font:16px/1.5 "Avenir Next",Avenir,system-ui,sans-serif}
 #combined-studio>.cs-bar{background:#20362b;color:#faf8e9}
@@ -25,6 +25,8 @@
 @media(max-width:720px){#combined-studio .cs-draft{flex:1 0 100%;max-width:100%;justify-content:space-between;padding-top:5px;border-top:1px solid #526858}#combined-studio .cs-toolbar{gap:7px 14px}#combined-studio .cs-tabs{margin-left:auto}}
 @media(max-width:400px){#combined-studio .cs-tabs button{padding:8px 9px}#combined-studio .cs-toolbar{padding-inline:10px;gap:5px 8px}}
 @media(pointer:coarse){#combined-studio .cs-tabs button,#combined-studio .cs-return{min-height:44px}}
+@media(max-width:480px){#combined-studio .cs-toolbar{gap:6px 12px;padding:7px 12px}#combined-studio .cs-name{font-size:22px}#combined-studio .cs-tabs button{padding-inline:9px}}
+@media(max-width:370px){#combined-studio .cs-tabs{margin-left:0}#combined-studio .cs-toolbar{column-gap:8px}}
 
     html,body{height:100%;margin:0;background:#f9f8f2}
     #combined-studio{display:flex;flex-direction:column;height:100vh;height:100dvh;min-height:260px}
@@ -41,6 +43,7 @@
       <div class="cs-tabs" role="tablist" aria-label="Studio workspace">
         <button type="button" role="tab" id="cs-writing-tab" aria-controls="cs-writing-pane" aria-selected="true" data-cs-app="novel">Writing</button>
         <button type="button" role="tab" id="cs-words-tab" aria-controls="cs-words-pane" aria-selected="false" tabindex="-1" data-cs-app="diction">Vocabulary</button>
+        <button type="button" role="tab" id="cs-lessons-tab" aria-controls="cs-lessons-pane" aria-selected="false" tabindex="-1" data-cs-app="lessons">Lessons</button>
       </div>
       <div class="cs-draft" hidden>
         <span class="cs-place"></span>
@@ -51,6 +54,7 @@
   <p class="cs-status" role="status" aria-live="polite" hidden></p>
   <div id="cs-writing-pane" role="tabpanel" aria-labelledby="cs-writing-tab" tabindex="-1"><iframe id="cs-novel-frame" title="Writing workspace"></iframe></div>
   <div id="cs-words-pane" role="tabpanel" aria-labelledby="cs-words-tab" tabindex="-1" hidden><iframe id="cs-diction-frame" title="Vocabulary workspace"></iframe></div>
+  <div id="cs-lessons-pane" role="tabpanel" aria-labelledby="cs-lessons-tab" tabindex="-1" hidden></div>
 </section>
 
   <noscript>Enable JavaScript to use Novel Studio.</noscript>
@@ -62,13 +66,68 @@
   const root = document.getElementById('combined-studio');
   if (!root || root.combinedStudio) return;
   const tabs = [...root.querySelectorAll('[data-cs-app]')];
-  const panels = {novel:root.querySelector('#cs-writing-pane'), diction:root.querySelector('#cs-words-pane')};
+  const panels = {novel:root.querySelector('#cs-writing-pane'), diction:root.querySelector('#cs-words-pane'), lessons:root.querySelector('#cs-lessons-pane')};
   const draft = root.querySelector('.cs-draft');
   const place = root.querySelector('.cs-place');
   const back = root.querySelector('.cs-return');
   const status = root.querySelector('.cs-status');
   const adapters = {};
   let active = 'novel', context = null, waiting = null;
+  let previousWorkspace = 'novel', lessonFrame = null, readerLoaded = false;
+  let requestedLesson = null;
+
+  function setHash(hash, replace = false) {
+    if (location.hash === hash) return;
+    if (replace) history.replaceState(null, '', hash);
+    else history.pushState(null, '', hash);
+  }
+  function sendLesson() {
+    if (!readerLoaded || !requestedLesson || active !== 'lessons') return;
+    lessonFrame.contentWindow.postMessage({type:'ns-open-lesson', ...requestedLesson}, location.origin);
+  }
+  function openLessons(track, lesson) {
+    if (active !== 'lessons') previousWorkspace = active;
+    requestedLesson = {track, lesson};
+    active = 'lessons';
+    tell();
+    paint();
+    if (lessonFrame) {
+      sendLesson();
+      return;
+    }
+    lessonFrame = document.createElement('iframe');
+    lessonFrame.title = 'Fiction and vocabulary lessons';
+    lessonFrame.addEventListener('load', () => {
+      readerLoaded = true;
+      sendLesson();
+    });
+    lessonFrame.src = 'lessons/index.html#' + track + (lesson ? '/' + lesson : '');
+    panels.lessons.appendChild(lessonFrame);
+  }
+  function followLocation() {
+    const route = /^#lessons(?:\/(fiction|vocabulary)(?:\/([a-z0-9-]+))?)?\/?$/.exec(location.hash);
+    if (route) openLessons(route[1] || (active === 'diction' ? 'vocabulary' : 'fiction'), route[2]);
+    else if (location.hash === '#vocabulary') openVocabulary(null, false);
+    else openWriting(false);
+  }
+  window.addEventListener('hashchange', followLocation);
+  window.addEventListener('message', event => {
+    if (active !== 'lessons' || !lessonFrame || event.source !== lessonFrame.contentWindow ||
+        event.origin !== location.origin) return;
+    const msg = event.data;
+    if (msg?.type === 'ns-lesson-workspace' && (msg.workspace === 'novel' || msg.workspace === 'diction')) {
+      const word = typeof msg.word === 'string' ? msg.word.trim().slice(0,120) : '';
+      if (msg.workspace === 'diction' && word) {
+        openVocabulary({...adapters.novel?.getContext?.(), action:'lookup', word});
+      } else select(msg.workspace);
+      tabs.find(tab => tab.dataset.csApp === msg.workspace)?.focus();
+    }
+    if (msg?.type !== 'ns-lesson-change' || !['fiction','vocabulary'].includes(msg.track) ||
+        typeof msg.lesson !== 'string' || !/^[a-z0-9-]+$/.test(msg.lesson)) return;
+    const resolvingTrack = !requestedLesson.lesson;
+    requestedLesson = {track:msg.track, lesson:msg.lesson};
+    setHash('#lessons/' + msg.track + '/' + msg.lesson, resolvingTrack);
+  });
 
   function tell(text = '') {
     status.textContent = text;
@@ -96,7 +155,14 @@
     diction.onVisible?.(context);
     if (request) diction.openContext?.(request);
   }
-  function openVocabulary(request) {
+  function openVocabulary(request, updateHash = true) {
+    if (updateHash) setHash('#vocabulary');
+    if (active === 'lessons' && previousWorkspace === 'diction' && !request) {
+      active = 'diction';
+      tell();
+      paint();
+      return;
+    }
     tell();
     context = request || adapters.novel?.getContext?.() || null;
     waiting = request || null;
@@ -105,8 +171,9 @@
     if (request) panels.diction.focus({preventScroll:true});
     applyVocabulary();
   }
-  function openWriting() {
-    if (active === 'diction') adapters.diction?.onHidden?.();
+  function openWriting(updateHash = true) {
+    if (updateHash) setHash('#writing');
+    if (active === 'diction' || (active === 'lessons' && previousWorkspace === 'diction')) adapters.diction?.onHidden?.();
     waiting = null;
     active = 'novel';
     paint();
@@ -142,7 +209,11 @@
   }
   function select(id) {
     if (active === id) return;
-    if (id === 'diction') openVocabulary();
+    if (id === 'lessons') {
+      const track = active === 'diction' ? 'vocabulary' : 'fiction';
+      setHash('#lessons/' + track);
+      openLessons(track);
+    } else if (id === 'diction') openVocabulary();
     else {tell(); openWriting();}
   }
   for (const [index, tab] of tabs.entries()) {
@@ -151,7 +222,8 @@
       const keys = ['ArrowLeft','ArrowRight','Home','End'];
       if (!keys.includes(event.key)) return;
       event.preventDefault();
-      const next = tabs[event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length-1 : (index+1)%tabs.length];
+      const offset = event.key === 'ArrowLeft' ? -1 : 1;
+      const next = tabs[event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length-1 : (index + offset + tabs.length) % tabs.length];
       select(next.dataset.csApp);
       next.focus();
     });
@@ -167,7 +239,7 @@
     }
   };
   root.combinedStudio = window.CombinedStudio = hub;
-  paint();
+  followLocation();
 })();
 
     for (const area of ['novel','diction']) {

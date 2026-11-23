@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#20362b">
+  <title>Lessons · Novel Studio</title>
+  <link rel="stylesheet" href="reader.css">
+  <script defer src="reader.js"></script>
+  <script defer src="originals.js"></script>
+</head>
+<body>
+  <a class="skip" href="#lesson-title">Skip to lesson</a>
+  <div class="reader-layout">
+    <aside class="library" aria-label="Lesson library">
+      <header class="library-head">
+        <h2>Lessons</h2>
+        <div class="track-switch" aria-label="Course" role="group">
+          <button type="button" data-track="fiction" aria-pressed="false">Fiction</button>
+          <button type="button" data-track="vocabulary" aria-pressed="false">Vocabulary</button>
+        </div>
+        <p id="progress" class="progress" hidden></p>
+        <div class="mobile-picker" id="mobile-picker" hidden>
+          <label for="lesson-picker">Choose a lesson</label>
+          <select id="lesson-picker"></select>
+        </div>
+      </header>
+      <nav id="lesson-list" class="lesson-list" aria-label="Lessons in this course"></nav>
+    </aside>
+    <main id="reading">
+      <div id="notice" class="notice" role="status">Loading lessons…</div>
+      <button id="retry" class="secondary" type="button" hidden>Try again</button>
+      <article id="article" hidden>
+        <header class="article-head">
+          <p id="context" class="context"></p>
+          <h1 id="lesson-title" tabindex="-1"></h1>
+          <div class="tools">
+            <button id="complete" class="complete" type="button" aria-pressed="false"><span class="check" aria-hidden="true"></span><span id="complete-label">Mark complete</span></button>
+            <button type="button" id="jump-original" class="workspace">Original PDF</button>
+            <a id="workspace" class="workspace" href="../#writing">Open writing workspace</a>
+          </div>
+        </header>
+        <div id="lesson-body" class="lesson-body"></div>
+        <section id="lesson-originals" aria-label="Original lesson PDF"></section>
+        <nav class="turn" aria-label="Previous and next lessons">
+          <a id="prev" rel="prev" hidden><span>Previous lesson</span><strong></strong></a>
+          <a id="next" rel="next" hidden><span>Next lesson</span><strong></strong></a>
+        </nav>
+      </article>
+      <p id="storage-status" role="status" hidden></p>
+    </main>
+  </div>
+  <button id="look-up" class="selection-action" type="button" hidden>Look up selection in Diction</button>
+</body>
+</html>
