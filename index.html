@@ -5,34 +5,50 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#20362b">
   <title>Novel Studio · Fiction and vocabulary</title>
-  <link rel="stylesheet" href="journey.css?v=1">
+  <link rel="stylesheet" href="journey.css?v=2">
   <script src="learning.js?v=1"></script>
-  <script defer src="journey.js?v=1"></script>
+  <script defer src="journey.js?v=2"></script>
   <style>
     :root { color-scheme:light; font:16px/1.5 "Avenir Next",Avenir,system-ui,sans-serif; color:#213c30; background:#f9f8f2; }
     * { box-sizing:border-box; }
     html,body { height:100%; margin:0; }
     #combined-studio { display:flex; flex-direction:column; height:100vh; height:100dvh; min-height:240px; }
     [hidden] { display:none!important; }
-    .cs-bar { flex:none; display:flex; align-items:center; gap:clamp(.75rem,2.5vw,2rem); flex-wrap:wrap; padding:.65rem clamp(.75rem,2.4vw,1.65rem); color:#faf8e9; background:#20362b; }
-    .cs-name { font:500 clamp(1.35rem,3vw,1.9rem)/1.15 "Iowan Old Style","Palatino Linotype",Georgia,serif; letter-spacing:-.04em; white-space:nowrap; }
+    .cs-bar { flex:none; display:flex; align-items:center; gap:clamp(.75rem,2.5vw,2rem); flex-wrap:wrap; padding:.65rem clamp(.75rem,2.4vw,1.65rem); color:#faf8e9; background:#172e2c; border-bottom:1px solid #9f8050; }
+    .cs-name { display:inline-flex; gap:.55rem; align-items:center; font:500 clamp(1.35rem,3vw,1.9rem)/1.15 "Iowan Old Style","Palatino Linotype",Georgia,serif; letter-spacing:-.04em; white-space:nowrap; }
+    .cs-emblem { width:24px; height:26px; position:relative; display:inline-block; flex:none; }
+    .cs-emblem::before { content:""; position:absolute; top:1px; left:2px; width:2px; height:2px; background:transparent;
+      box-shadow:8px 0 #a78554,10px 0 #a78554,6px 2px #dec280,12px 2px #a78554,6px 4px #dec280,12px 4px #a78554,
+      4px 6px #f1cc89,6px 6px #f1cc89,8px 6px #f1cc89,10px 6px #d6a866,12px 6px #d6a866,14px 6px #ab8657; }
+    .cs-emblem::after { content:""; position:absolute; left:2px; top:9px; width:20px; height:16px;
+      background:linear-gradient(to right,#a07b4e 0 20%,#ffe7a0 20% 40%,#f7bc66 40% 60%,#f5a85e 60% 80%,#977449 80%);
+      clip-path:polygon(0 0,100% 0,100% 12.5%,90% 12.5%,90% 75%,80% 75%,80% 87.5%,100% 87.5%,100% 100%,0 100%,0 87.5%,20% 87.5%,20% 75%,10% 75%,10% 12.5%,0 12.5%); }
     .cs-tabs { display:inline-flex; gap:2px; padding:3px; border:1px solid #6d8170; border-radius:7px; }
     .cs-tabs button { border:0; border-radius:4px; padding:.5rem .9rem; font-family:inherit; font-weight:550; line-height:1.25; font-size:.9rem; color:#e8ede3; background:transparent; cursor:pointer; }
-    .cs-tabs button[aria-selected=true] { background:#f0efd9; color:#20362b; }
+    .cs-tabs button[aria-selected=true] { background:#f1e8c9; color:#20362b; }
     .cs-tabs button[aria-selected=false]:hover { background:#344b3e; }
     .cs-bar :focus-visible { outline:2px solid #e9ca85; outline-offset:3px; }
     #journey-button { margin-left:auto; }
     #combined-studio>[role=tabpanel] { flex:1 1 0; min-height:0; min-width:0; }
     iframe { display:block; border:0; width:100%; height:100%; background:#f9f8f2; }
     @media(max-width:520px) { .cs-bar { gap:.4rem .6rem; padding:.4rem .65rem; } .cs-tabs button { padding:.42rem .48rem; } }
-    @media(max-width:375px) { .cs-name { font-size:1.2rem; } .cs-bar { column-gap:.4rem; } }
+    @media(max-width:375px) { .cs-name { font-size:1.2rem; gap:.3rem; } .cs-emblem { display:none; } .cs-bar { column-gap:.4rem; } }
+    @media(max-width:465px) {
+      .cs-bar { gap:.35rem; padding:.35rem .55rem; }
+      .cs-name { font-size:1.19rem; gap:.25rem; }
+      .cs-emblem { width:20px; transform:scale(.8); transform-origin:left center; }
+      .cs-tabs button { font-size:.83rem; padding:.45rem .45rem; }
+      .cs-bar #journey-button { padding:.3rem .45rem; font-size:.83rem; }
+      .cs-bar #journey-button .journey-trigger-level { display:none; }
+    }
+    @media(max-width:360px) { .cs-emblem { display:none; } .cs-name { font-size:1.08rem; } }
     @media(pointer:coarse) { .cs-tabs button { min-height:40px; } }
   </style>
 </head>
 <body>
   <main id="combined-studio" aria-label="Novel Studio">
     <header class="cs-bar">
-      <span class="cs-name">Novel Studio</span>
+      <span class="cs-name"><span class="cs-emblem" aria-hidden="true"></span>Novel Studio</span>
       <nav class="cs-tabs" role="tablist" aria-label="Study tools">
         <button type="button" role="tab" id="lessons-tab" aria-selected="true" aria-controls="lessons-pane">Lessons</button>
         <button type="button" role="tab" id="diction-tab" tabindex="-1" aria-selected="false" aria-controls="diction-pane">Vocabulary</button>
@@ -85,7 +101,7 @@
       lessonFrame = document.createElement("iframe");
       lessonFrame.title = "Fiction and vocabulary lessons";
       lessonFrame.addEventListener("load", () => { readerReady = true; sendLesson(); });
-      lessonFrame.src = "lessons/index.html?v=3#" + track + (lesson ? "/" + lesson : "");
+      lessonFrame.src = "lessons/index.html?v=4#" + track + (lesson ? "/" + lesson : "");
       panels.lessons.append(lessonFrame);
     }
     function updateReview(kind, info) {
@@ -108,7 +124,7 @@
       if (dictionFrame) return;
       dictionFrame = document.createElement("iframe");
       dictionFrame.title = "Diction vocabulary tools";
-      dictionFrame.src = "diction/index.html?v=3";
+      dictionFrame.src = "diction/index.html?v=4";
       panels.diction.append(dictionFrame);
     }
     function showDiction(request) {

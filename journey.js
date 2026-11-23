@@ -48,13 +48,16 @@
         <button type="button" class="journey-close">Close</button>
       </header>
       <section class="journey-level" aria-labelledby="journey-level-title">
-        <div class="journey-level-row">
-          <h3 id="journey-level-title"></h3>
-          <span class="journey-level-total"></span>
+        <div class="journey-map" role="group" aria-label="Achievement map"></div>
+        <div class="journey-hud">
+          <div class="journey-level-row">
+            <h3 id="journey-level-title"></h3>
+            <span class="journey-level-total"></span>
+          </div>
+          <progress class="journey-level-bar" aria-label="Experience toward the next level"></progress>
+          <div class="journey-level-caption"><span class="journey-level-next"></span><span class="journey-days"></span></div>
+          <p class="journey-latest" hidden></p>
         </div>
-        <progress class="journey-level-bar" aria-label="Experience toward the next level"></progress>
-        <div class="journey-level-caption"><span class="journey-level-next"></span><span class="journey-days"></span></div>
-        <p class="journey-latest" hidden></p>
       </section>
       <section class="journey-section" aria-labelledby="journey-quests">
         <div class="journey-section-title"><h3 id="journey-quests">Today’s challenges</h3><span class="journey-quest-count"></span></div>
@@ -160,18 +163,30 @@
   }
 
   const milestones = [
-    {title:"First application", description:"Apply a skill independently.", target:1, value:d => d.totals.applications},
-    {title:"Remembered later", description:"Recall one item on a later day.", target:1, value:d => d.totals.retained},
-    {title:"Across both courses", description:"Recall an item on a later day in each course.", target:2,
+    {title:"First application", mapLabel:"Application", description:"Apply a skill independently.", target:1, value:d => d.totals.applications},
+    {title:"Remembered later", mapLabel:"Later recall", description:"Recall one item on a later day.", target:1, value:d => d.totals.retained},
+    {title:"Across both courses", mapLabel:"Both courses", description:"Recall an item on a later day in each course.", target:2,
       value:d => Number(d.tracks.fiction.retained > 0) + Number(d.tracks.vocabulary.retained > 0)}
   ].map(milestone => {
     const row = el("li");
+    row.tabIndex = -1;
     const description = el("span", "journey-milestone-description");
     description.append(el("strong", "", milestone.title), el("span", "", milestone.description));
     const progress = el("span", "journey-milestone-progress");
     row.append(description, progress);
     find(".journey-milestones").append(row);
-    return {...milestone, progress};
+    const marker = el("button", "journey-waypoint");
+    marker.type = "button";
+    const flag = el("span", "journey-flag");
+    flag.setAttribute("aria-hidden", "true");
+    marker.append(flag, el("span", "journey-flag-name", milestone.mapLabel));
+    marker.addEventListener("click", () => {
+      find(".journey-record").open = true;
+      row.focus({preventScroll:true});
+      row.scrollIntoView({block:"nearest"});
+    });
+    find(".journey-map").append(marker);
+    return {...milestone, progress, marker};
   });
 
   function when(time) {
@@ -234,8 +249,13 @@
     find(".journey-memory").textContent = retained === 1 ? "1 distinct question recalled successfully on a later day." : retained.toLocaleString() + " distinct questions recalled successfully on a later day.";
     for (const milestone of milestones) {
       const count = Math.min(milestone.value(data),milestone.target);
-      milestone.progress.textContent = count === milestone.target ? "Earned" : count + " / " + milestone.target;
-      milestone.progress.classList.toggle("journey-earned", count === milestone.target);
+      const earned = count === milestone.target;
+      const status = earned ? "Earned" : count + " / " + milestone.target;
+      milestone.progress.textContent = status;
+      milestone.progress.classList.toggle("journey-earned", earned);
+      milestone.marker.classList.toggle("journey-earned-flag", earned);
+      milestone.marker.setAttribute("aria-label", milestone.title + ", " + status + ". View milestone.");
+      milestone.marker.title = milestone.title + " · " + status;
     }
     const storage = find(".journey-storage");
     storage.hidden = data.storageAvailable;

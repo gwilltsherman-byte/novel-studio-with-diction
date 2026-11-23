@@ -19,3 +19,30 @@
   .milestones-title { flex-basis:100%; }
 }
 @media print { .lesson-milestones { display:none; } }
+
+@media screen {
+  .lesson-milestones { margin: 0 0 .85rem; font-size: .85rem; }
+  .lesson-milestones summary { gap: .35rem .9rem; }
+  .milestones-marks { gap: .36rem .55rem; }
+  .milestone-mark {
+    gap: .35rem; padding: .13rem .42rem .13rem .25rem; border: 1px solid #d2cebb; border-radius: 2px;
+    background: #eeece0; color: #505c50; font-size: .8rem; line-height: 1.25;
+  }
+  .milestone-mark .milestone-glyph {
+    position: relative; width: 1.25rem; height: 1.25rem; border: 0; border-radius: 0; font-size: 0;
+    background: url("game-icons.png") 0 center / 300% 100% no-repeat; image-rendering: pixelated;
+  }
+  .milestone-mark[data-skill="applied"] .milestone-glyph { background-position-x: 50%; }
+  .milestone-mark[data-skill="retained"] .milestone-glyph { background-position-x: 100%; }
+  .milestone-mark[data-complete="false"] .milestone-glyph { filter: grayscale(.85); opacity: .82; }
+  .milestone-mark[data-complete="true"] { background: #e3edda; border-color: #839675; color: #244d37; }
+  .milestone-mark[data-complete="true"] .milestone-glyph::after {
+    content: "✓"; position: absolute; bottom: -1px; right: -3px; width: .7rem; height: .7rem;
+    border: 1px solid #eff5e6; border-radius: 2px; background: #29513b; color: white;
+    font: bold .61rem/.68rem system-ui, sans-serif; text-align: center;
+  }
+}
+@media screen and (max-width: 440px) {
+  .lesson-milestones { margin-bottom: .6rem; }
+  .lesson-milestones summary { row-gap: .22rem; }
+}

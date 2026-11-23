@@ -302,6 +302,7 @@
     for (const button of document.querySelectorAll("[data-track]")) {
       button.setAttribute("aria-pressed", String(button.dataset.track === track));
     }
+    document.body.dataset.course = track;
     $("lesson-title").textContent = lessonName(lesson);
     $("context").textContent = [trackName, sideLabel(lesson)].filter(Boolean).join(" · ");
     document.title = lessonName(lesson) + " · " + trackName + " · Novel Studio";

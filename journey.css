@@ -20,14 +20,14 @@
   position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap;
 }
 #learning-journey {
-  --journey-ink:#213b2f; --journey-muted:#526458; --journey-line:#cbd4c1; --journey-green:#294d3b; --journey-paper:#fafaf3;
+  --journey-ink:#1c3337; --journey-muted:#455b59; --journey-line:#c9cbb9; --journey-green:#215850; --journey-paper:#faf7ed;
   box-sizing:border-box; width:min(38rem,calc(100vw - 2rem)); max-width:100%; padding:0;
   max-height:calc(100vh - 2rem); max-height:calc(100dvh - 2rem);
   margin:auto; overflow:auto; overscroll-behavior:contain; scrollbar-gutter:stable;
   border:1px solid #9aa993; border-radius:.9rem; color:var(--journey-ink); background:var(--journey-paper);
   box-shadow:0 20px 80px #142d2440; font:1rem/1.5 "Avenir Next",Avenir,system-ui,sans-serif;
 }
-#learning-journey::backdrop { background:#11291e68; }
+#learning-journey::backdrop { background:#091b24aa; }
 #learning-journey * { box-sizing:border-box; }
 #learning-journey :focus-visible { outline:3px solid #90721d; outline-offset:3px; }
 #learning-journey [hidden] { display:none; }
@@ -45,12 +45,52 @@
 }
 #learning-journey .journey-close { border:1px solid var(--journey-line); border-radius:.35rem; padding:.3rem .65rem; text-decoration:none; }
 #learning-journey .journey-close:hover, #learning-journey .journey-practice:hover { background:#e2e9da; }
-#learning-journey .journey-level { background:#2b4938; color:#fffdf2; padding:.9rem 1.05rem; border-radius:.55rem; }
-#learning-journey .journey-level-total { font-weight:650; }
-#learning-journey .journey-level-bar { margin:.75rem 0 .45rem; width:100%; height:.52rem; display:block; appearance:none; border:0; border-radius:1rem; background:#5c7462; color:#e2cf95; }
-#learning-journey .journey-level-bar::-webkit-progress-bar { border-radius:1rem; background:#5c7462; }
-#learning-journey .journey-level-bar::-webkit-progress-value { border-radius:1rem; background:#e2cf95; }
-#learning-journey .journey-level-bar::-moz-progress-bar { border-radius:1rem; background:#e2cf95; }
+#learning-journey .journey-level {
+  border:2px solid #375158; border-radius:.38rem; overflow:hidden; background:#142c34; color:#fffdf2;
+}
+#learning-journey .journey-map {
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-items:end;
+  height:clamp(6.75rem,22vw,9rem); padding:.3rem .5rem .5rem; border-bottom:2px solid #a99058;
+  background:#254d53 url("assets/game/atlas.webp") center 52% / cover no-repeat; image-rendering:pixelated;
+}
+#learning-journey .journey-waypoint {
+  display:grid; justify-items:center; justify-self:center; align-content:end; gap:.05rem;
+  min-width:44px; min-height:44px; max-width:100%; padding:.15rem .1rem;
+  background:transparent; border:0; border-radius:.15rem; color:#fff5cb; line-height:1.1;
+}
+#learning-journey .journey-waypoint:nth-child(2) { align-self:center; }
+#learning-journey .journey-waypoint:nth-child(3) { align-self:start; }
+#learning-journey .journey-flag {
+  display:block; position:relative; width:26px; height:25px;
+  background:linear-gradient(90deg,#10252a 0 2px,#f9dd91 2px 5px,#10252a 5px 7px,transparent 7px);
+  filter:drop-shadow(1px 2px 0 #12282e);
+}
+#learning-journey .journey-flag::before, #learning-journey .journey-flag::after {
+  position:absolute; content:""; left:5px; top:1px; width:21px; height:16px;
+  background:#152b32; clip-path:polygon(0 0,100% 0,100% 20%,85% 20%,85% 40%,68% 50%,85% 60%,85% 80%,100% 80%,100% 100%,0 100%);
+}
+#learning-journey .journey-flag::after { left:6px; top:3px; width:15px; height:12px; background:#c8d2ce; }
+#learning-journey .journey-earned-flag .journey-flag::after { background:#ffcb61; }
+#learning-journey .journey-flag-name {
+  display:block; padding:.17rem .35rem; border:1px solid #98a599; border-radius:2px;
+  background:#152e36; color:#fffbea; font:650 .73rem/1.2 system-ui,sans-serif; box-shadow:1px 2px 0 #10262b;
+}
+#learning-journey .journey-earned-flag .journey-flag-name { border-color:#e8be69; color:#ffe0a3; }
+#learning-journey .journey-earned-flag .journey-flag-name::before { content:"✓ "; }
+#learning-journey .journey-waypoint:hover .journey-flag-name { text-decoration:underline; text-underline-offset:.15em; }
+#learning-journey .journey-waypoint:focus-visible { outline:3px solid #fff5b8; outline-offset:0; background:#18353b; }
+#learning-journey .journey-hud { padding:.65rem .85rem .8rem; box-shadow:inset 0 2px #345054; }
+#learning-journey .journey-level-total {
+  border:1px solid #ad965e; padding:.12rem .5rem; color:#ffe4a0; border-radius:2px; background:#233e42;
+  font:700 .86rem/1.4 ui-monospace,monospace; box-shadow:1px 2px 0 #0d2028;
+}
+#learning-journey .journey-level-bar {
+  margin:.5rem 0 .35rem; width:100%; height:.68rem; display:block; appearance:none; overflow:hidden;
+  border:1px solid #7e9286; border-radius:2px; background:#213a40; color:#78d1a1; accent-color:#78d1a1;
+}
+#learning-journey .journey-level-bar::-webkit-progress-bar { background:#213a40; }
+#learning-journey .journey-level-bar::-webkit-progress-value { background:repeating-linear-gradient(90deg,#8ed7ae 0 9px,#63ad8c 9px 11px); }
+#learning-journey .journey-level-bar::-moz-progress-bar { background:repeating-linear-gradient(90deg,#8ed7ae 0 9px,#63ad8c 9px 11px); }
 #learning-journey .journey-level-caption { font-size:.875rem; color:#eef0de; }
 #learning-journey .journey-section { margin-top:1.35rem; }
 #learning-journey .journey-quest-count, #learning-journey .journey-quest-description p, #learning-journey .journey-track-record, #learning-journey .journey-record p, #learning-journey .journey-storage { color:var(--journey-muted); font-size:.9rem; }
@@ -58,9 +98,10 @@
 #learning-journey .journey-quest { display:flex; align-items:flex-start; gap:.75rem; padding:.7rem 0 .45rem; border-top:1px solid var(--journey-line); }
 #learning-journey .journey-quest-score {
   display:grid; place-items:center; min-width:2.5rem; height:2rem; font-size:.87rem; font-weight:650;
-  font-variant-numeric:tabular-nums; color:var(--journey-green); border:1px solid #a8b7a2; border-radius:.4rem;
+  font-variant-numeric:tabular-nums; color:#544b2a; background:#f6edcb; border:1px solid #9d8c57;
+  border-radius:.2rem; box-shadow:inset 0 2px #fff8da,1px 2px #cfc39a;
 }
-#learning-journey .journey-complete .journey-quest-score { background:var(--journey-green); border-color:var(--journey-green); color:#fffcf1; }
+#learning-journey .journey-complete .journey-quest-score { background:var(--journey-green); border-color:#285b52; color:#fffcf1; box-shadow:inset 0 2px #558478,1px 2px #b9c6ae; }
 #learning-journey .journey-quest-description { display:grid; flex:1; grid-template-columns:1fr auto; align-items:start; gap:.12rem .6rem; }
 #learning-journey h4 { font-size:1rem; line-height:1.4; font-weight:650; }
 #learning-journey .journey-quest-description p { grid-column:1; line-height:1.45; }
@@ -92,6 +133,7 @@
 
 #learning-journey .journey-milestones { padding:0; list-style:none; margin:.8rem 0; }
 #learning-journey .journey-milestones li { display:flex; justify-content:space-between; align-items:center; gap:.7rem; border-top:1px solid var(--journey-line); padding:.55rem 0; }
+#learning-journey .journey-milestones li:focus { background:#f2edda; outline:2px solid #977d43; outline-offset:2px; }
 #learning-journey .journey-milestone-description { display:grid; font-size:.9rem; color:var(--journey-muted); }
 #learning-journey .journey-milestone-description strong { color:var(--journey-ink); font-weight:650; }
 #learning-journey .journey-milestone-progress { flex:none; font-size:.85rem; font-variant-numeric:tabular-nums; color:var(--journey-muted); }
@@ -105,3 +147,13 @@
 .journey-standalone-bar > a { display:flex; align-items:center; min-height:40px; color:inherit; text-decoration:underline; text-underline-offset:.2rem; }
 .journey-standalone-bar > a:focus-visible { outline:2px solid #f7d991; outline-offset:2px; }
 @media print { .journey-standalone-bar { display:none; } }
+
+@media(max-width:420px) {
+  #learning-journey .journey-map { height:6rem; padding-inline:.2rem; }
+  #learning-journey .journey-flag-name { font-size:.68rem; padding-inline:.22rem; }
+}
+@media(forced-colors:active) {
+  #learning-journey .journey-waypoint { border:1px solid ButtonText; }
+  #learning-journey .journey-flag { display:none; }
+  #learning-journey .journey-level-bar { appearance:auto; }
+}
