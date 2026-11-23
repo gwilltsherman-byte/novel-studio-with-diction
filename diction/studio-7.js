@@ -352,7 +352,7 @@
         ['elapse', 'verb', 'To pass, when speaking of a length of time.'],
         ['defer', 'verb', 'To put an action or decision off until a later time.']
       ]),
-    theme('prosecraft', 'Tools at the revision desk',
+    theme('prosecraft', 'Tools for revising prose',
       'Identify a deliberate choice in a passage and test what changes when you revise it.',
       'Write two sentences about a locked garden gate. Revise one feature of the language to make a reader feel welcome at the same gate.',
       'Write a station announcement, then put it into the mouth of a person on the platform. Change one feature that makes the voice recognizable.',

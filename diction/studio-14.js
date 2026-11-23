@@ -259,7 +259,7 @@
       (w?.sourceName?'<p class="pk-meta">'+e(w.sourceName)+'</p>':'')+
       '<div class="actions"><button class="primary" type="submit">Save sense</button>'+(w?btn('pk-remove','Remove from pack'):'')+'</div><div id="pk-confirm"></div></form>');back(p);
     const retire=id=>{
-      if(!D.packReviewItem(id)&&!D.words.some(item=>item.id===id)&&!D.state.notes.some(item=>item.id===id||item.wordId===id))delete D.state.reviews[id];
+      if(!D.packReviewItem(id)&&!D.words.some(item=>item.id===id)&&!D.state.notes.some(item=>item.id===id||item.wordId===id)){delete D.state.reviews[id];D.onReviewChange?.();}
     };
     listen('form',ev=>{
       ev.preventDefault();const f=ev.currentTarget,word=value(f,'word'),sense=value(f,'sense');if(!word||!sense){f.elements.namedItem(!word?'word':'sense').focus();return;}
@@ -307,7 +307,8 @@
     }else{
       content='<span class="eyebrow">Compare usage</span><h2>'+e(w.word)+'</h2><blockquote>'+e(a.reason)+'</blockquote>'+
         '<p>'+e(w.contrast||'Read your sentence aloud. Does the word fit its context, and would the simpler choice change the reader’s impression?')+'</p>'+example+
-        btn('pk-next',a.index+1===a.ids.length?'Finish word session':'Next word','primary');
+        '<fieldset class="coach-rating"><legend>Does your example fit the sense you studied?</legend><div class="actions">'+
+        btn('pk-fits','Fits this sense','primary')+btn('pk-revise','Needs another try')+'</div></fieldset>';
     }
     write(backBtn('Save and return to pack')+top(p.title,scope)+'<article class="panel pk-panel pk-study">'+content+'</article>');back(p);
     if(intro){listen('#pk-next',()=>{const id=a.fresh[a.intro],today=localDay(Date.now());
@@ -326,7 +327,15 @@
     }else if(a.stage==='compare'){
       listen('[name="reason"]',ev=>{a.reason=ev.target.value;D.save();},'input');
       listen('form',ev=>{ev.preventDefault();a.reason=value(ev.currentTarget,'reason');if(!a.reason)return;data().usage ||= [];data().usage.push({date:new Date().toISOString(),packId:p.id,id:w.id,word:w.word,response:a.reason});save('feedback');},'submit');
-    }else listen('#pk-next',()=>{a.index++;a.attempt='';a.reason='';a.skip=false;a.hinted=false;save('recall');});
+    }else{
+      function rateUsage(grade){
+        if(a.stage!=='feedback')return;
+        D.learningAttempt(w.id+'/usage',w.neighbor?'compare':'apply',grade);
+        a.index++;a.attempt='';a.reason='';a.skip=false;a.hinted=false;save('recall');
+      }
+      listen('#pk-fits',()=>rateUsage('good'));
+      listen('#pk-revise',()=>rateUsage('again'));
+    }
   }
   function challenge(p,j=null){
     if(j&&(j.completed||Date.parse(j.due)>Date.now())){detail(p);return;}
@@ -344,6 +353,7 @@
     const prompt=j?j.followupPrompt:d.prompt;
     write(backBtn('Back to pack')+top(j?'Independent follow-up':p.title,j?'Write a fresh passage':'Write from a brief')+
       '<form class="panel pk-panel"><h2>'+e(prompt)+'</h2>'+field('passage','Your passage',d.passage,true,true)+field('rationale','Which word choice served your purpose, and why?',d.rationale,true,true)+
+      '<label><input type="checkbox" name="checkedSense"> I checked my word choice against the intended meaning.</label>'+
       '<button class="primary">Save '+(j?'follow-up':'writing sample')+'</button></form>');back(p);
     ['passage','rationale'].forEach(k=>listen('[name="'+k+'"]',ev=>{d[k]=ev.target.value;D.save();},'input'));
     listen('form',ev=>{
@@ -351,6 +361,7 @@
       const date=new Date().toISOString();
       if(j){Object.assign(j,{followupPassage:passage,followupReason:reason,completed:date});}
       else data().journal.push({id:uid('writing'),packId:p.id,title:p.title,prompt,followupPrompt:d.followupPrompt,passage,rationale:reason,date,due:new Date(Date.now()+7*day).toISOString()});
+      D.learningAttempt('pack/'+p.id+(j?'/followup':'/application'),'apply',f.elements.namedItem('checkedSense').checked?'good':'hard');
       enroll(p);delete drafts[key];D.save();go(p);
     },'submit');
   }

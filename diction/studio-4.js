@@ -40,7 +40,10 @@
     return (note.wordId && findWord(note.wordId)) ? note.wordId : note.id;
   }
   function scheduleNew(id) {
-    if (!D.state.reviews[id]) D.state.reviews[id] = {level:0, due:new Date().toISOString()};
+    if (!D.state.reviews[id]) {
+      D.state.reviews[id] = {level:0, due:new Date().toISOString()};
+      D.onReviewChange?.();
+    }
   }
   function entryDate(value) {
     return new Date(value).toLocaleDateString(undefined, {month:"short",day:"numeric",year:"numeric"});
@@ -152,6 +155,7 @@
         D.state.notes=D.state.notes.filter(n=>n.id!==note.id);
         if (key === note.id && !D.packReviewItem?.(key)) {
           delete D.state.reviews[key];
+          D.onReviewChange?.();
           if (D.state.lexicalAttempt?.id === key) delete D.state.lexicalAttempt;
         }
         D.save(); navigate("notebook");
@@ -195,6 +199,11 @@
       .filter(r=>r.item && Number.isFinite(readDate(r.due)))
       .sort((a,b)=>readDate(a.due)-readDate(b.due));
   }
+  D.reviewStatus = () => {
+    const queue = getQueue(), now = Date.now();
+    const future = queue.find(row => readDate(row.due) > now);
+    return {due:queue.filter(row => readDate(row.due) <= now).length, nextDue:future ? readDate(future.due) : null};
+  };
   function startAttempt(id, fromStudy = false) {
     if (!reviewItem(id)) return;
     if (D.state.lexicalAttempt?.id !== id) {
@@ -250,13 +259,21 @@
     }
   }
   D.recordRecall = function ({id,word,grade:outcome,answer="",assisted=false,fromStudy=false}) {
-    const old = Number(D.state.reviews[id]?.level) || 0;
+    const previous = D.state.reviews[id];
+    const earlyRepeat = Boolean(previous?.lastReviewed && Date.parse(previous.due) > Date.now());
+    const old = Number(previous?.level) || 0;
     const level=outcome==="recalled" ? Math.min(intervals.length,old+1) : 0;
     const delay=outcome==="recalled" ? intervals[level-1]*day : outcome==="partial" ? day : 10*60000;
     const date=new Date().toISOString(), due=new Date(Date.now()+delay).toISOString();
     D.state.reviews[id]={...D.state.reviews[id],level,due,lastReviewed:date,lastGrade:outcome};
     if (!Array.isArray(D.state.reviewHistory)) D.state.reviewHistory=[];
     D.state.reviewHistory.push({id,word,date,grade:outcome,assisted,fromStudy,answer,due});
+    if (answer.trim() || outcome === "missed") {
+      const correct = !assisted && outcome === "recalled" && D.coach.matches(answer,word);
+      const grade = outcome === "missed" ? "again" : correct ? "good" : "hard";
+      D.learningAttempt(id, "recall", grade, earlyRepeat);
+    }
+    D.onReviewChange?.();
     return {date,due};
   };
   function grade(outcome) {

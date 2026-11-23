@@ -166,7 +166,14 @@
     const due = all.filter(item => records.get(item.key)?.due <= now)
       .sort((a, b) => records.get(a.key).due - records.get(b.key).due);
     const chosen = [];
-    if (mode === "review") {
+    if (mode === "apply") {
+      // A writing challenge has a single prompt and its own session, separate from the lesson set.
+      const writing = all.filter(item => isLocal(item) && item.card.kind === "apply");
+      const target = due.find(item => isLocal(item) && item.card.kind === "apply") ||
+        writing.find(item => !records.has(item.key)) ||
+        writing.sort((a,b) => records.get(a.key).at - records.get(b.key).at)[0];
+      if (target) chosen.push(target);
+    } else if (mode === "review") {
       while (due.length && chosen.length < sessionSize) take(due, chosen, true);
     } else {
       const localDue = due.filter(isLocal);

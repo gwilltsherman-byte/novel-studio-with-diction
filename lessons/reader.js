@@ -305,8 +305,6 @@
     $("lesson-title").textContent = lessonName(lesson);
     $("context").textContent = [trackName, sideLabel(lesson)].filter(Boolean).join(" · ");
     document.title = lessonName(lesson) + " · " + trackName + " · Novel Studio";
-    $("workspace").href = track === "fiction" ? "../#writing" : "../#vocabulary";
-    $("workspace").textContent = track === "fiction" ? "Open writing workspace" : "Open vocabulary workspace";
     showList();
     showText();
     window.NovelStudy.open({track, lesson, contentBlock, sourceLinks, navigate: open});
@@ -326,11 +324,11 @@
       else window.scrollTo(0, 0);
     }
   }
-  async function open(track, requested, {push = false, focus = false} = {}) {
+  async function open(track, requested, {push = false, focus = false, action} = {}) {
     const state = readState();
     track = isTrack(track) ? track : isTrack(state.track) ? state.track : "fiction";
     const version = ++generation;
-    pending = {track, requested};
+    pending = {track, requested, action};
     try {
       const {lessons} = await course(track);
       if (generation !== version) return;
@@ -343,6 +341,7 @@
         render(focus);
       }
       notify({type: "ns-lesson-change", track, lesson: lesson.id});
+      if (action && (!requested || lesson.id === requested)) window.NovelStudy.showActivity(action);
     } catch {
       if (generation !== version) return;
       $("notice").textContent = "This course could not be loaded. Check your connection and try again.";
@@ -406,15 +405,15 @@
   $("workspace").addEventListener("click", event => {
     if (!embedded || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
-    notify({type: "ns-lesson-workspace", workspace: current.track === "fiction" ? "novel" : "diction"});
+    notify({type: "ns-lesson-workspace", workspace: "diction"});
   });
   $("retry").addEventListener("click", () => {
-    if (pending) open(pending.track, pending.requested);
+    if (pending) open(pending.track, pending.requested, {action:pending.action});
   });
   window.addEventListener("message", event => {
     if (!embedded || event.source !== window.parent || event.origin !== location.origin) return;
     const data = event.data;
-    if (data?.type === "ns-open-lesson" && isTrack(data.track)) open(data.track, data.lesson);
+    if (data?.type === "ns-open-lesson" && isTrack(data.track)) open(data.track, data.lesson, {action:data.action});
   });
   window.addEventListener("hashchange", followHash);
   window.addEventListener("popstate", followHash);

@@ -89,7 +89,7 @@
     } else if(example) note.source=example;
     if(note.source) note.sourceName=sense.source+' · Example sentence by writer';
     if (!D.state.reviews[note.id]) D.state.reviews[note.id]={due:new Date().toISOString(),level:0};
-    D.save();return note;
+    D.save();D.onReviewChange?.();return note;
   }
   function asText(html) {
     const clean=document.createElement('template'); clean.innerHTML=String(html || '');
@@ -120,7 +120,6 @@
       '<div class="dict-detail"><article class="panel dict-sense-panel"><h2>Meanings</h2><div id="dict-senses"></div>'+(!local.length?'<div id="dictionary-import"></div>':'')+'<div class="dict-online"><p id="dict-online-status" aria-live="polite"></p><div class="actions">'+button('online','Load English meanings online','secondary')+link(entryUrl(word),'Read on Wiktionary')+'</div><p class="dict-meta">Online lookup sends this headword to English Wiktionary.</p></div></article>'+
       '<form class="panel dict-save"><h2>Study this sense</h2><p id="dict-selection" class="dict-selected" aria-live="polite"></p><div id="dict-custom"><label class="field-label" for="dict-meaning">Meaning in your own words</label><textarea id="dict-meaning" maxlength="600" rows="3"></textarea></div>'+
       '<label class="field" for="dict-example"><span class="field-label">Your example sentence (optional)</span><textarea id="dict-example" maxlength="2200" rows="3"></textarea></label><div class="actions"><button type="submit" class="primary" name="dest" value="packs">'+(from.pack?'Add to this pack':'Add to a pack')+'</button><button type="submit" class="secondary" name="dest" value="notebook">Save to notebook</button></div><p class="dict-meta">Adding a sense to a pack also saves it in your notebook.</p></form></div></section>';
-    D.manuscriptLink?.offer(D.root.querySelector('.dict-entry-head'),word);
     const root=D.root.querySelector('.dict-page'), q=sel=>root.querySelector(sel), container=q('#dict-senses');
     if(edits.meaning)q('#dict-meaning').value=edits.meaning;
     if(edits.example)q('#dict-example').value=edits.example;

@@ -32,10 +32,11 @@
   function button(action, label, type = 'secondary') {
     return '<button type="button" class="' + type + '" data-coach="' + action + '">' + label + '</button>';
   }
-  function sentenceField(draft) {
+  function sentenceField(draft, newWord) {
     return '<label class="field"><span class="field-label">Try it in a sentence <span class="coach-optional">(optional)</span></span>' +
       '<textarea data-field="sentence" rows="2" maxlength="1600" placeholder="Write a line you could use in your own work.">' +
-      e(draft.sentence) + '</textarea></label>';
+      e(draft.sentence) + '</textarea></label>' +
+      (newWord ? '<label class="coach-self-check"><input type="checkbox" data-field="checked"'+(draft.checkedSense?' checked':'')+'> I checked my sentence against this meaning.</label>' : '');
   }
 
   function pendingCard(prior) {
@@ -52,7 +53,7 @@
       (complete ? 'Round complete' : 'You’re caught up') + '</h1>' +
       (!complete ? '<p>Your next word will appear when another sense or review is ready.</p>' : '') +
       '<ul class="coach-results">' + round.events.map(item => '<li><strong>' + e(item.word) + '</strong><span>' +
-        e(outcomes[item.outcome]) + '</span></li>').join('') + '</ul><div class="actions"><a class="primary" href="#home">Back to desk</a>' +
+        e(outcomes[item.outcome]) + '</span></li>').join('') + '</ul><div class="actions"><a class="primary" href="#home">Back to word practice</a>' +
       (D.coach.next() ? '<a class="secondary" href="#guided?round=1">Start another round</a>' : '') + '</div></section>';
     D.root.focus?.({preventScroll:true});
   }
@@ -64,9 +65,8 @@
     if (quick && (!round || round.finished)) {
       round = D.state.quickRound = {events:[]}; D.save();
     }
-    const fromScene = options.from === 'manuscript' && D.manuscriptLink?.active();
-    const prior = quick ? round.draft : fromScene ? D.manuscriptLink.getDraft() : D.state.drafts.guidedWord;
-    const mode = fromScene ? 'scene' : quick ? 'quick' : options.return === 'journey' ? 'journey' : 'guided';
+    const prior = quick ? round.draft : D.state.drafts.guidedWord;
+    const mode = quick ? 'quick' : options.return === 'journey' ? 'journey' : 'guided';
     const card = pendingCard(prior) || (mode === 'journey' && options.id && D.coach.get(options.id)) || D.coach.next();
     show(card, card && prior?.id === card.id && prior.kind === card.kind ? prior : null, mode);
   };
@@ -81,16 +81,16 @@
     const round = mode === 'quick' ? currentRound() : null;
     const journey = mode === 'journey';
     const saveDraft = () => {
-      if (round) round.draft=draft; else if (mode==='scene') D.manuscriptLink.setDraft(draft); else D.state.drafts.guidedWord=draft;
+      if (round) round.draft=draft; else D.state.drafts.guidedWord=draft;
       D.save();
     };
-    const back = journey ? '<a href="#journey" class="back">Back to journey</a>' : '<a href="#home" class="back">'+(round?'Pause round':'Writing desk')+'</a>';
+    const back = journey ? '<a href="#journey" class="back">Back to journey</a>' : '<a href="#home" class="back">'+(round?'Pause round':'Word practice')+'</a>';
     const surface = '<section class="coach-page">' + back +
       (round && card ? '<div class="coach-round-meter"><span>Word '+(round.events.length+1)+' of '+roundSize+'</span><progress aria-label="Words finished this round" max="'+roundSize+'" value="'+round.events.length+'"></progress></div>' : '') +
       '<p role="status" class="coach-status"' + (message ? '' : ' hidden') + '>' + e(message) + '</p>';
     if (!card) {
       if (round) {round.finished=true;delete round.draft;D.save();D.go('guided',{round:'recap'});return;}
-      root.innerHTML = surface + '<header class="pagehead"><h1>You’re all caught up.</h1><p>Your next word will appear here when a review is due or you add an edition with new definitions.</p></header><a class="primary" href="#home">Back to writing desk</a></section>';
+      root.innerHTML = surface + '<header class="pagehead"><h1>You’re all caught up.</h1><p>Your next word will appear here when a review is due or you add an edition with new definitions.</p></header><a class="primary" href="#home">Back to word practice</a></section>';
       if (focus) root.focus?.({preventScroll:true});
       return;
     }
@@ -109,7 +109,7 @@
         (review && draft.attempt && !draft.passed ? '<p class="coach-comparison">' + (matched
           ? (draft.hinted ? 'You found the target word with a hint.' : 'You recalled the target word.')
           : 'You wrote <strong>“' + e(draft.attempt) + '”</strong>. Compare its meaning with the study word.') + '</p>' : '') +
-        entry(card) + sentenceField(draft);
+        entry(card) + sentenceField(draft,!review);
       if (review) {
         content += '<fieldset class="coach-rating"><legend>How well did you recall this word?</legend><div class="actions">' +
           (matched && !draft.hinted ? button('got','Recalled it','primary') : '') +
@@ -118,12 +118,11 @@
       } else {
         const label = journey ? 'Add to reviews &amp; finish step' : round?.events.length===roundSize-1 ? 'Add to reviews &amp; finish' : 'Add to reviews &amp; continue';
         content += '<div class="actions">' + button('studied',label,'primary') +
-          button('known','I know this word') + button('skip','Not for my writing','back') + '</div>';
+          button('known','I know this word') + button('skip','Set aside','back') + '</div>';
       }
     }
     root.innerHTML = surface + '<article class="coach-study">' + content + '</article>' +
       (!testing && card.reason ? '<aside class="coach-why"><h2>Why this word?</h2><p>' + e(card.reason) + '</p></aside>' : '') + '</section>';
-    if (!testing) D.manuscriptLink?.offer(select('.coach-study'),card.word);
     const field = name => select('[data-field="' + name + '"]');
     for (const name of ['attempt','sentence']) {
       const input = field(name);
@@ -132,6 +131,7 @@
         draft[name] = input.value; saveDraft();
       };
     }
+    if(field('checked')) field('checked').onchange=event=>{draft.checkedSense=event.target.checked;saveDraft();};
     function reveal(passed) {
       if (version !== showing) return;
       draft.attempt = field('attempt').value.trim();
@@ -149,10 +149,10 @@
         }
         if (action === 'pass') { reveal(true); return; }
         control.disabled = true;
-        if (round) delete round.draft; else if (mode==='scene') D.manuscriptLink.setDraft(null); else delete D.state.drafts.guidedWord;
+        if (round) delete round.draft; else delete D.state.drafts.guidedWord;
         const accepted = D.coach.record(card.id, action, {
           sentence:field('sentence')?.value.trim() || '',
-          assisted:!!(draft.hinted || draft.passed), attempt:draft.attempt
+          assisted:!!(draft.hinted || draft.passed), attempt:draft.attempt, checkedSense:!!field('checked')?.checked
         });
         if (round && accepted) {
           round.events.push({word:card.word,outcome:action});

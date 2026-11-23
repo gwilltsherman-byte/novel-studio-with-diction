@@ -91,13 +91,10 @@
       : 'A new sense to try in your writing.'};
   }
   function recentWriting() {
-    const practice = D.state.drafts?.practice, sessions = (D.state.sessions || []).slice(-3).reverse();
-    const texts = [practice?.original,practice?.revision,practice?.intent,D.manuscriptLink?.excerpt];
-    for (const s of sessions) texts.push(s.revision,s.original,s.intent);
+    const texts = [];
     for (const j of (D.state.packs?.journal || []).slice(-2)) texts.push(j.passage,j.followupPassage);
     for (const sample of (D.state.coachWriting || []).slice(-3)) texts.push(sample.sentence);
-    return {terms:new Set(tokens(texts.filter(Boolean).map(t=>String(t).slice(-1200)).join(' '))),
-      tracks:[practice?.track,...sessions.map(s=>s.track)].filter(Boolean)};
+    return new Set(tokens(texts.filter(Boolean).map(t=>String(t).slice(-1200)).join(' ')));
   }
   function next() {
     const now = Date.now(), model = profile(), cards = personalCards();
@@ -147,13 +144,12 @@
       considered.add(key);
       const study = item.origin === 'study' || item.origin === 'pack';
       const context = new Set(tokens([item.sense,item.contrast,item.example,item.group].join(' ')));
-      const hits = [...context].filter(t=>writing.terms.has(t));
+      const hits = [...context].filter(t=>writing.has(t));
       const enrolled = item.onShelf || !!D.state.packs?.enrolled?.[item.packId];
-      const track = writing.tracks.includes(item.group);
       const history = weakness.get(item.group);
       const weaknessScore = history ? (history[0]+1)/(history[1]+4) - 0.25 : 0;
       const pref = model.groups['g/'+item.group]?.interest || 0;
-      let score = (study ? 2.2 : 0.25) + (track ? 2.4 : 0) + (enrolled ? 1.7 : 0)
+      let score = (study ? 2.2 : 0.25) + (enrolled ? 1.7 : 0)
         + Math.min(3,hits.length)*0.75 + weaknessScore*3 + pref + (item.origin==='notebook' ? 2.7 : 0);
       score -= trail.filter(t=>t===item.group).length * (explore ? 2.5 : 0.95);
       if (trail.at(-1)===item.group) score -= 0.6;
@@ -168,8 +164,7 @@
       bestScore = score;
       let reason = item.neighbor ? 'A word with a close alternative to try in a sentence.' : 'A new sense to try in your writing.';
       if (item.origin==='notebook') reason='A sense from your notebook, ready to put to work.';
-      else if (hits.length>=2) reason='Its meaning overlaps with details in your recent writing.';
-      else if (track) reason='This word fits the craft track you have been practicing.';
+      else if (hits.length>=2) reason='Its meaning overlaps with details in your vocabulary exercises.';
       else if (enrolled) reason='This word comes from a pack on your shelf.';
       else if (weaknessScore>0.12) reason='Recent recalls suggest more practice with this kind of word could help.';
       else if (explore) reason='A change of focus from the senses you have been practicing.';
@@ -211,13 +206,16 @@
     if (sentence) {
       D.state.coachWriting ||= [];
       D.state.coachWriting.push({id,word:item.word,sentence,date:new Date(now).toISOString()});
+      if (outcome==='studied' && !matches(sentence,item.word)) {
+        D.learningAttempt(id+'/sentence','apply',options.checkedSense?'good':'hard');
+      }
     }
     if (outcome==='skip') {
       model.challengeHistory=((model.challengeHistory || '')+'.').slice(-10);
       group.interest=clamp(group.interest*0.9-0.6,-2,1);
       model.later[id]=now+7*day;
       if (previous) previous.due=new Date(model.later[id]).toISOString();
-      D.save();return true;
+      D.save();D.onReviewChange?.();return true;
     }
     let hours, h;
     const assisted=!!options.assisted;
@@ -259,7 +257,7 @@
     if (['got','partial','missed'].includes(outcome) && lastEvent?.id===id) {
       lastEvent.due=review.due;lastEvent.exactMatch=exactMatch;
     }
-    D.save();return true;
+    D.save();D.onReviewChange?.();return true;
   }
   function get(id) {
     if (profile().later[id]>Date.now() || stamp(D.state.reviews[id]?.due)>Date.now()) return null;

@@ -82,3 +82,9 @@
 .workbook-footer { display:flex; justify-content:space-between; flex-wrap:wrap; gap:.6rem; color:var(--muted); font:.88rem/1.45 var(--sans); }
 .workbook summary { cursor:pointer; }
 .workbook:not([open]) summary { margin:0; }
+
+.workbook-body > .practice-secondary { margin-top:.75rem; }
+.workbook-check { margin-top:.8rem; border-top:1px solid var(--line); padding-top:.8rem; }
+.workbook-check h4 { margin:.25rem 0; }
+.workbook-check .workbook-evidence { min-height:4.5rem; }
+.workbook-check [role=status]:empty { display:none; }

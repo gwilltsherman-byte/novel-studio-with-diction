@@ -15,9 +15,7 @@
   ].filter(Boolean)).size;
 
   function writingTerms() {
-    const draft = D.state.drafts.practice;
-    const texts = [draft?.revision, draft?.original, draft?.intent, D.manuscriptLink?.excerpt];
-    for (const s of D.state.sessions.slice(-3)) texts.push(s.revision, s.original, s.intent);
+    const texts = [];
     for (const s of (D.state.packs?.journal || []).slice(-3)) texts.push(s.passage, s.followupPassage);
     for (const s of (D.state.coachWriting || []).slice(-4)) texts.push(s.sentence);
     for (const s of (D.state.packs?.usage || []).slice(-4)) texts.push(s.response);
@@ -82,7 +80,7 @@
         const score = familyScore + unseen / Math.max(1, pack.entries.length) * 3 + shelfBonus;
         if (best && best.score >= score) continue;
         const reason = focused ? 'You chose ' + track.title + ' as your focus.'
-          : relevant.length ? '“' + relevant[0] + '” appears in your writing and in this family of words.'
+          : relevant.length ? '“' + relevant[0] + '” appears in your vocabulary exercises and in this family of words.'
           : recallWord ? 'A recent recall of “' + recallWord + '” was difficult. This pack practices related language.'
           : shelfBonus ? 'This pack is on your shelf and has more words ready to study.'
           : recentTracks.length && !recentTracks.slice(0, 3).includes(track.id) ? 'A different focus from your recent packs gives this chapter a change of subject.'
@@ -145,12 +143,11 @@
   function lastStop(upcoming) {
     const recall = history().at(-1), journal = D.state.packs?.journal || [];
     const lastBrief = journal.reduce((last, current) => !last || Date.parse(current.completed || current.date) > Date.parse(last.completed || last.date) ? current : last, null);
-    const sentence = D.state.coachWriting?.at(-1), session = D.state.sessions.at(-1);
+    const sentence = D.state.coachWriting?.at(-1);
     const previous = [
       recall && {date:recall.date, text:fold(recall.word) === fold(upcoming?.reviewWord) ? 'Practiced a word from memory' : 'Practiced “'+recall.word+'”'},
       lastBrief && {date:lastBrief.completed || lastBrief.date,text:(lastBrief.completed ? 'Wrote a follow-up for ' : 'Wrote a passage for ')+lastBrief.title},
-      sentence && {date:sentence.date,text:fold(sentence.word) === fold(upcoming?.reviewWord) ? 'Saved a practice sentence' : 'Wrote a sentence with “'+sentence.word+'”'},
-      session && {date:session.date,text:'Finished a writing session in '+session.track}
+      sentence && {date:sentence.date,text:fold(sentence.word) === fold(upcoming?.reviewWord) ? 'Saved a practice sentence' : 'Wrote a sentence with “'+sentence.word+'”'}
     ].filter(Boolean).sort((a,b) => Date.parse(b.date)-Date.parse(a.date))[0];
     return previous?.text || '';
   }

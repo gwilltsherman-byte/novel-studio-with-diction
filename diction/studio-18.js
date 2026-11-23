@@ -23,7 +23,10 @@
     }
     if(example){note.source=example;note.sourceName=def.source+' · Example sentence by writer';note.dictionarySource=def.source;}
     const key=note.wordId || note.id;
-    if(!D.state.reviews[key])D.state.reviews[key]={due:new Date().toISOString(),level:0};
+    if(!D.state.reviews[key]){
+      D.state.reviews[key]={due:new Date().toISOString(),level:0};
+      D.onReviewChange?.();
+    }
     D.save();
     return note;
   };
@@ -91,10 +94,6 @@
       const esc=D.esc;
       if(word)senses=data.lookup(word).filter(s=>typeof s?.definition==='string' && s.definition.trim()).map(s=>({...s,definition:s.definition.trim(),source:s.source||data.source}));
       for(const n of personal)senses.push({definition:n.sense,source:'Writer’s own meaning',pos:''});
-      const draft=D.state.drafts.practice;
-      if(senses.length && D.view==='practice' && draft?.step==='draft' && !draft.isFollowUp && !draft.usedLookup){
-        draft.usedLookup=true;D.save();
-      }
       results.innerHTML=(word?'<h3>'+esc(word)+'</h3>':'')+
         (senses.length?'<ol class="ql-senses">'+senses.slice(0,limit).map((s,i)=>{
           const saved=savedSense(word,s);
@@ -104,16 +103,13 @@
           word?'<p>This spelling is indexed. Your editions have no definition for it.</p>':'')+
         (!senses.length && (word || !suggestions.length)?'<details class="ql-personal"><summary>Save my own meaning</summary><form id="ql-own"><label for="ql-meaning">Meaning of “'+esc(word||input.value.trim())+'”</label><textarea id="ql-meaning" rows="2" maxlength="600" required></textarea><button class="secondary">Save to notebook</button></form></details>':'')+
         (suggestions.length?'<div class="ql-related"><p>'+(word?'Related spellings':'Matching words')+'</p><div>'+suggestions.map(w=>'<button type="button" data-ql-word="'+esc(w)+'">'+esc(w)+'</button>').join('')+'</div></div>':'');
-      D.manuscriptLink?.offer(results,word);
       status.textContent=word?(senses.length+' '+(senses.length===1?'meaning':'meanings')+' for '+word):suggestions.length?suggestions.length+' suggestions':'No matching words.';
     }
     function open(saved) {
       if(active){(form.hidden?closeButton:input).focus();return;}
       active=true;origin=saved||remember();notesChanged=false;limit=3;
-      const recall=['#coach-recall','#lx-attemptform','#pk-skip','#practice-answer'].some(s=>D.root.querySelector(s));
-      const independent=!!(D.root.querySelector('#practice-newPassage') ||
-        (D.state.drafts.practice?.isFollowUp && D.root.querySelector('#practice-original')) ||
-        (D.view==='packs' && D.options?.followup && D.root.querySelector('[name="passage"]')));
+      const recall=['#coach-recall','#lx-attemptform','#pk-skip'].some(s=>D.root.querySelector(s));
+      const independent=D.view==='packs' && D.options?.followup && !!D.root.querySelector('[name="passage"]');
       form.hidden=recall||independent;
       input.value=form.hidden?'':origin.text;
       if(form.hidden){

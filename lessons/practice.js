@@ -63,7 +63,7 @@
   }
 
   function sessionKey(track, lessonId, mode) {
-    return "ns.practice-session.v1." + (mode === "review" ? "review" : track + "." + lessonId);
+    return "ns.practice-session.v1." + (mode === "review" ? "review" : track + "." + lessonId + (mode === "apply" ? ".apply" : ""));
   }
 
   function hasResume(track, lessonId, mode) {
@@ -72,7 +72,7 @@
     return Boolean(state && Array.isArray(state.queue) && state.queue[state.position]);
   }
 
-  function mount({root, track, lesson, mode, card: sectionCard, banks, onExit, onSource, onComplete}) {
+  function mount({root, track, lesson, mode, card: sectionCard, banks, onExit, onSource, onComplete, onProgress}) {
     mounts.get(root)?.destroy();
     const scheduler = window.StudySchedule;
     const sectionCheck = mode === "section";
@@ -83,7 +83,7 @@
 
     function freshSession() {
       const result = sectionCheck ? {items: [{
-        key: sectionCard.untracked ? "" : scheduler.itemKey(track, lesson.id, sectionCard.id),
+        key: scheduler.itemKey(track, lesson.id, sectionCard.id),
         track, lessonId: lesson.id, card: sectionCard
       }]} : scheduler.start({banks, track, lessonId: lesson.id, mode});
       durable = result.storageAvailable !== false;
@@ -141,7 +141,9 @@
       const missed = grades.filter(entry => entry.first === "again");
       const available = mode === "review" ? stats.globalDue > 0 : stats.seen < stats.total || stats.due > 0;
       const panel = node("section", null, "practice-summary");
-      const title = node("h2", grades.length ? "Session complete" : mode === "review" ? "You’re up to date" : "Lesson practice is up to date");
+      const heading = mode === "apply" ? (grades.length ? "Writing challenge complete" : "No writing challenge in this lesson") :
+        (grades.length ? "Session complete" : mode === "review" ? "You’re up to date" : "Lesson practice is up to date");
+      const title = node("h2", heading);
       panel.append(title);
       if (grades.length) {
         const independent = grades.filter(entry => entry.first === "good").length;
@@ -173,7 +175,7 @@
         panel.append(node("p", "Your next review is due " + dateLabel(stats.nextDue) + "."));
       }
       const actions = node("div", null, "practice-actions");
-      if (available && grades.length) {
+      if (mode !== "apply" && available && grades.length) {
         actions.append(button(mode === "review" ? "Continue reviewing" : "Practice another set", "practice-primary", () => {
           state = freshSession();
           render();
@@ -187,8 +189,15 @@
       focusHeading(title);
     }
 
+    function logAttempt(ref, grade, retry) {
+      window.NovelLearning?.record({
+        type: "attempt", key: ref.key, track: ref.track, kind: sourceCard(ref).kind, grade, retry
+      });
+    }
+
     function record(grade) {
       const ref = state.queue[state.position];
+      if (state.draft.trim()) logAttempt(ref, grade, ref.retry === true);
       if (sectionCheck) {
         if (!sectionCard.untracked) scheduler.rate(ref.key, grade);
         view.destroy();
@@ -196,6 +205,7 @@
         return;
       }
       const outcome = scheduler.rate(ref.key, grade);
+      onProgress?.();
       if (outcome?.storageAvailable === false) durable = false;
       if (!ref.retry) {
         state.grades[ref.key] = {...ref, first: grade};
@@ -212,6 +222,8 @@
     }
 
     function showAnswer(passed) {
+      // An unanswered reveal resets the elapsed review interval without counting as practice.
+      if (passed && !state.draft.trim()) logAttempt(state.queue[state.position], "again", true);
       state.passed = passed;
       state.stage = "feedback";
       render();
@@ -319,7 +331,7 @@
       const section = node("section", null, "practice-card");
       const meta = node("div", null, "practice-meta");
       const originals = state.queue.filter(item => !item.retry).length;
-      const counter = sectionCheck ? "Section check" : ref.retry ? "Try again" : "Question " + (Object.keys(state.grades).length + 1) + " of " + originals;
+      const counter = sectionCheck ? "Section check" : mode === "apply" ? "Writing challenge" : ref.retry ? "Try again" : "Question " + (Object.keys(state.grades).length + 1) + " of " + originals;
       meta.append(node("span", counter, "practice-counter"), node("span", locationLabel(ref)));
       const label = kindLabels[card.kind] || "Recall";
       const prompt = node("h2", card.prompt, "practice-prompt");
@@ -329,7 +341,7 @@
       if (state.stage === "write") renderQuestion(card, section);
       else focus = feedback(card, ref, section);
       const controls = node("div", null, "practice-actions practice-session-footer");
-      controls.append(button(sectionCheck ? "Read section again" : "Pause practice", "practice-secondary", exit));
+      controls.append(button(sectionCheck ? "Read section again" : mode === "apply" ? "Pause writing challenge" : "Pause practice", "practice-secondary", exit));
       section.append(controls);
       storageNote(section);
       root.replaceChildren(section);

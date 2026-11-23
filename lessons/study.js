@@ -96,6 +96,12 @@
   function refreshReview() {
     if (!current || !banks) return;
     const info = window.StudySchedule.summary(banks, current.track, current.lesson.id);
+    const reviewStatus = {due:info.globalDue, nextDue:info.nextDue};
+    if (window.parent !== window) {
+      window.parent.postMessage({type:"ns-review-status", ...reviewStatus}, location.origin);
+    } else {
+      window.NovelJourney?.setReviewStatus(reviewStatus);
+    }
     const review = $("due-review");
     const resumable = window.NovelPractice.hasResume(current.track, current.lesson.id, "review");
     review.firstChild.textContent = resumable ? "Resume review " : "Review both courses ";
@@ -124,6 +130,10 @@
     const response = node("div", null, "opening-response");
     response.hidden = true;
     function choose(answer) {
+      window.NovelLearning?.record({
+        type:"opener", key:window.StudySchedule.itemKey(current.track,current.lesson.id,"opener"),
+        track:current.track, grade:answer === correct ? "good" : "again"
+      });
       for (const el of choices.children) {
         el.disabled = true;
         el.classList.toggle("correct-choice", Number(el.dataset.choice) === correct);
@@ -191,7 +201,7 @@
       return b.text ? [b.text] : [];
     }).filter(Boolean);
     if (!lines.length) return null;
-    return {id:"guided-" + step, kind:"recall", untracked:true, prompt:"How would you explain “" + unit.title + "” to another writer? Recall one concrete detail from the reading.", answer:lines.slice(0,3).join("\n\n"), criteria:["Compare the idea in your answer with the passage.", "Check one specific detail or example against the source."], page:unit.first};
+    return {id:"guided-p" + refs[0].page + "-b" + refs[0].index, kind:"recall", untracked:true, prompt:"How would you explain “" + unit.title + "” to another writer? Recall one concrete detail from the reading.", answer:lines.slice(0,3).join("\n\n"), criteria:["Compare the idea in your answer with the passage.", "Check one specific detail or example against the source."], page:unit.first};
   }
 
   function startCheck(unit, card) {
@@ -248,7 +258,7 @@
 
   function setView(mode) {
     view = mode;
-    for (const btn of document.querySelectorAll("[data-view]")) btn.setAttribute("aria-pressed", String(btn.dataset.view === mode || (mode === "review" && btn.dataset.view === "practice")));
+    for (const btn of document.querySelectorAll("[data-view]")) btn.setAttribute("aria-pressed", String(btn.dataset.view === mode || (["review","apply"].includes(mode) && btn.dataset.view === "practice")));
     $("source-pane").hidden = mode !== "text";
     work.hidden = mode === "text";
     $("return-practice").hidden = !returnFromSource;
@@ -284,7 +294,7 @@
       if (ticket !== generation) return;
       const {track,lesson} = current;
       const origin = {track,lessonId:lesson.id,mode};
-      session = window.NovelPractice.mount({root:work,track,lesson,mode,banks,onExit:() => show("learn",true),onSource:source => openSource(source,origin)});
+      session = window.NovelPractice.mount({root:work,track,lesson,mode,banks,onProgress:refreshReview,onExit:() => show("learn",true),onSource:source => openSource(source,origin)});
       refreshReview();
     } catch {
       if (ticket !== generation) return;
@@ -312,5 +322,8 @@
   window.addEventListener("focus",refreshReview);
   window.addEventListener("storage",event => { if (!event.key || event.key.startsWith("ns.practice.schedule.v1/")) refreshReview(); });
   document.addEventListener("visibilitychange",() => { if (!document.hidden) refreshReview(); });
-  window.NovelStudy = {open};
+  function showActivity(action) {
+    if (current && ["practice","apply","review"].includes(action)) show(action, true);
+  }
+  window.NovelStudy = {open,showActivity};
 })();

@@ -37,3 +37,5 @@ textarea{resize:vertical;min-height:90px}::placeholder{color:#738077;opacity:1}
 @media(max-width:780px) and (min-width:631px){nav{gap:0}nav a{padding:0 6px;gap:4px;font-size:.86rem}}
 @media(max-width:500px){.mast-inner nav a{flex-direction:column;gap:3px;font-size:.76rem;padding:7px 3px 10px}.mast-inner nav{gap:2px}.track-meta{display:none}}
 
+
+.hero.vocab-hero{grid-template-columns:minmax(0,1fr);min-height:0}.vocab-hero .hero-copy{max-width:70ch;padding-block:clamp(1.5rem,4vw,3rem)}
