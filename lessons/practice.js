@@ -332,25 +332,10 @@
       const meta = node("div", null, "practice-meta");
       const originals = state.queue.filter(item => !item.retry).length;
       const counter = sectionCheck ? "Section check" : mode === "apply" ? "Writing challenge" : ref.retry ? "Try again" : "Question " + (Object.keys(state.grades).length + 1) + " of " + originals;
-      const counterLabel = node("span", counter, "practice-counter");
-      if (originals > 1) {
-        const trail = node("span", null, "practice-trail");
-        trail.setAttribute("aria-hidden", "true");
-        const answered = Object.keys(state.grades).length;
-        for (let index = 0; index < originals; index++) {
-          const step = node("i");
-          if (index < answered) step.className = "is-past";
-          if (index === answered && !ref.retry) step.className = "is-current";
-          trail.append(step);
-        }
-        counterLabel.append(trail);
-      }
-      meta.append(counterLabel, node("span", locationLabel(ref)));
+      meta.append(node("span", counter, "practice-counter"), node("span", locationLabel(ref)));
       const label = kindLabels[card.kind] || "Recall";
       const prompt = node("h2", card.prompt, "practice-prompt");
-      const kindLabel = node("p", label, "practice-kind");
-      kindLabel.setAttribute("data-kind", card.kind);
-      section.append(meta, kindLabel, prompt);
+      section.append(meta, node("p", label, "practice-kind"), prompt);
       if (card.context) section.append(node("p", card.context, "practice-context"));
       let focus = prompt;
       if (state.stage === "write") renderQuestion(card, section);

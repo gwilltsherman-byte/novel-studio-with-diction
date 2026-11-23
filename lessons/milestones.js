@@ -27,7 +27,6 @@
   const rows = milestones.map(({key,label,detail}) => {
     const mark = document.createElement("span");
     mark.className = "milestone-mark";
-    mark.dataset.skill = key;
     const glyph = document.createElement("span");
     glyph.className = "milestone-glyph";
     glyph.setAttribute("aria-hidden","true");
