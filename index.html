@@ -101,7 +101,7 @@
       readerLoaded = true;
       sendLesson();
     });
-    lessonFrame.src = 'lessons/index.html#' + track + (lesson ? '/' + lesson : '');
+    lessonFrame.src = 'lessons/index.html?v=2#' + track + (lesson ? '/' + lesson : '');
     panels.lessons.appendChild(lessonFrame);
   }
   function followLocation() {

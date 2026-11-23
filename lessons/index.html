@@ -6,7 +6,13 @@
   <meta name="theme-color" content="#20362b">
   <title>Lessons · Novel Studio</title>
   <link rel="stylesheet" href="reader.css">
-  <script defer src="reader.js"></script>
+  <link rel="stylesheet" href="study.css">
+  <script defer src="openers.js"></script>
+  <script defer src="schedule.js"></script>
+  <script defer src="practice.js"></script>
+  <script defer src="workbook.js"></script>
+  <script defer src="study.js"></script>
+  <script defer src="reader.js?v=2"></script>
   <script defer src="originals.js"></script>
 </head>
 <body>
@@ -20,6 +26,8 @@
           <button type="button" data-track="vocabulary" aria-pressed="false">Vocabulary</button>
         </div>
         <p id="progress" class="progress" hidden></p>
+        <button type="button" id="due-review" class="due-review">Review both courses <span id="due-count"></span></button>
+        <p id="due-detail" class="due-detail" hidden></p>
         <div class="mobile-picker" id="mobile-picker" hidden>
           <label for="lesson-picker">Choose a lesson</label>
           <select id="lesson-picker"></select>
@@ -34,14 +42,23 @@
         <header class="article-head">
           <p id="context" class="context"></p>
           <h1 id="lesson-title" tabindex="-1"></h1>
-          <div class="tools">
-            <button id="complete" class="complete" type="button" aria-pressed="false"><span class="check" aria-hidden="true"></span><span id="complete-label">Mark complete</span></button>
-            <button type="button" id="jump-original" class="workspace">Original PDF</button>
-            <a id="workspace" class="workspace" href="../#writing">Open writing workspace</a>
-          </div>
         </header>
-        <div id="lesson-body" class="lesson-body"></div>
-        <section id="lesson-originals" aria-label="Original lesson PDF"></section>
+        <nav class="study-modes" aria-label="Lesson views">
+          <button type="button" data-view="learn" aria-pressed="true">Guided lesson</button>
+          <button type="button" data-view="practice" aria-pressed="false">Practice</button>
+          <button type="button" data-view="text" aria-pressed="false">Full text</button>
+        </nav>
+        <section id="study-work" aria-label="Study workspace"></section>
+        <div id="source-pane" hidden>
+          <button id="return-practice" class="secondary" type="button" hidden>Return to practice</button>
+          <div id="lesson-body" class="lesson-body"></div>
+          <section id="lesson-originals" aria-label="Original lesson PDF"></section>
+        </div>
+        <div class="tools reader-tools">
+          <a id="workspace" class="workspace" href="../#writing">Open writing workspace</a>
+          <button id="complete" class="complete" type="button" aria-pressed="false"><span class="check" aria-hidden="true"></span><span id="complete-label">Mark complete</span></button>
+          <button type="button" id="jump-original" class="workspace">Original PDF</button>
+        </div>
         <nav class="turn" aria-label="Previous and next lessons">
           <a id="prev" rel="prev" hidden><span>Previous lesson</span><strong></strong></a>
           <a id="next" rel="next" hidden><span>Next lesson</span><strong></strong></a>

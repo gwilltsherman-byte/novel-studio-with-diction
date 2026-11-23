@@ -265,6 +265,8 @@
     for (const [index, page] of pages.entries()) {
       const section = element("section");
       section.className = "source-page";
+      section.id = "source-page-" + (page.number ?? index + 1);
+      section.tabIndex = -1;
       const pageLabel = "Page " + (page.number ?? index + 1);
       section.setAttribute("aria-label", pageLabel);
       if (pages.length > 1) {
@@ -307,6 +309,7 @@
     $("workspace").textContent = track === "fiction" ? "Open writing workspace" : "Open vocabulary workspace";
     showList();
     showText();
+    window.NovelStudy.open({track, lesson, contentBlock, sourceLinks, navigate: open});
     turnLink("prev", lessons[index - 1]);
     turnLink("next", lessons[index + 1]);
     $("retry").hidden = true;
@@ -332,7 +335,7 @@
       const {lessons} = await course(track);
       if (generation !== version) return;
       const preferred = requested || state.recent?.[track];
-      const lesson = lessons.find(item => item.id === preferred) || lessons[0];
+      const lesson = lessons.find(item => item.id === preferred) || lessons.find(item => item.id === "week-1") || lessons[0];
       setAddress(track, lesson.id, push);
       if (current?.track !== track || current.lesson.id !== lesson.id || $("article").hidden) {
         current = {track, lessons, lesson};
@@ -378,7 +381,7 @@
   });
   function selectedTerm() {
     const selection = window.getSelection();
-    const body = $("lesson-body");
+    const body = $("article");
     if (!selection || selection.isCollapsed || !body.contains(selection.anchorNode) || !body.contains(selection.focusNode)) return "";
     const term = selection.toString().trim().replace(/\s+/g, " ");
     return term && term.length <= 120 && term.split(" ").length <= 10 ? term : "";
