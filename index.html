@@ -3,39 +3,58 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#20362b">
+  <meta name="theme-color" media="(prefers-color-scheme: light) and (min-width: 791px)" content="#20362b">
+  <meta name="theme-color" media="(prefers-color-scheme: light) and (max-width: 790px)" content="#fbfaf4">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f1a15">
   <title>Novel Studio · Fiction and vocabulary</title>
-  <link rel="stylesheet" href="journey.css?v=1">
+  <link rel="stylesheet" href="theme.css?v=1">
+  <link rel="stylesheet" href="journey.css?v=2">
   <script src="learning.js?v=1"></script>
-  <script defer src="journey.js?v=1"></script>
+  <script defer src="journey.js?v=2"></script>
   <style>
-    :root { color-scheme:light; font:16px/1.5 "Avenir Next",Avenir,system-ui,sans-serif; color:#213c30; background:#f9f8f2; }
+    /* 17 px body text that follows the reader's text size; Dynamic Type on iPhone and iPad. */
+    html { font-size:106.25%; -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+    @supports (font: -apple-system-body) and (-webkit-touch-callout: none) { html { font:-apple-system-body; } }
+    body { font:1rem/1.5 var(--ns-sans); color:var(--ns-text); background:var(--ns-paper); }
     * { box-sizing:border-box; }
     html,body { height:100%; margin:0; }
     #combined-studio { display:flex; flex-direction:column; height:100vh; height:100dvh; min-height:240px; }
     [hidden] { display:none!important; }
-    .cs-bar { flex:none; display:flex; align-items:center; gap:clamp(.75rem,2.5vw,2rem); flex-wrap:wrap; padding:.65rem clamp(.75rem,2.4vw,1.65rem); color:#faf8e9; background:#20362b; }
-    .cs-name { font:500 clamp(1.35rem,3vw,1.9rem)/1.15 "Iowan Old Style","Palatino Linotype",Georgia,serif; letter-spacing:-.04em; white-space:nowrap; }
-    .cs-tabs { display:inline-flex; gap:2px; padding:3px; border:1px solid #6d8170; border-radius:7px; }
-    .cs-tabs button { border:0; border-radius:4px; padding:.5rem .9rem; font-family:inherit; font-weight:550; line-height:1.25; font-size:.9rem; color:#e8ede3; background:transparent; cursor:pointer; }
-    .cs-tabs button[aria-selected=true] { background:#f0efd9; color:#20362b; }
-    .cs-tabs button[aria-selected=false]:hover { background:#344b3e; }
-    .cs-bar :focus-visible { outline:2px solid #e9ca85; outline-offset:3px; }
+    .cs-bar { position:relative; flex:none; display:flex; align-items:center; gap:clamp(.75rem,2.5vw,2rem); flex-wrap:wrap; padding:.6rem max(clamp(.75rem,2.4vw,1.65rem),env(safe-area-inset-right)) .6rem max(clamp(.75rem,2.4vw,1.65rem),env(safe-area-inset-left)); color:var(--ns-chrome-text); background:var(--ns-chrome); }
+    .cs-name { font:500 clamp(1.3rem,2.6vw,1.75rem)/1.15 var(--ns-serif); letter-spacing:-.035em; }
+    .cs-tabs { display:inline-flex; gap:2px; padding:3px; border:1px solid var(--ns-chrome-line); border-radius:8px; }
+    .cs-tabs button { display:inline-flex; align-items:center; justify-content:center; gap:.4rem; min-height:44px; border:0; border-radius:5px; padding:.45rem 1rem; font:600 .9rem/1.2 var(--ns-sans); color:inherit; background:transparent; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+    .cs-tabs button[aria-selected=true] { background:var(--ns-chrome-selected); color:var(--ns-chrome); }
+    @media (hover: hover) { .cs-tabs button[aria-selected=false]:hover { background:var(--ns-chrome-hover); } }
+    .cs-tab-icon { display:none; }
+    .cs-bar :focus-visible { outline:2px solid var(--ns-chrome-focus); outline-offset:3px; }
     #journey-button { margin-left:auto; }
     #combined-studio>[role=tabpanel] { flex:1 1 0; min-height:0; min-width:0; }
-    iframe { display:block; border:0; width:100%; height:100%; background:#f9f8f2; }
-    @media(max-width:520px) { .cs-bar { gap:.4rem .6rem; padding:.4rem .65rem; } .cs-tabs button { padding:.42rem .48rem; } }
-    @media(max-width:375px) { .cs-name { font-size:1.2rem; } .cs-bar { column-gap:.4rem; } }
-    @media(pointer:coarse) { .cs-tabs button { min-height:40px; } }
+    iframe { display:block; border:0; width:100%; height:100%; background:var(--ns-paper); }
+    /* While a lesson sheet is open, the studio chrome joins its backdrop. */
+    .ns-modal-open .cs-bar::after { content:""; position:absolute; inset:0; background:var(--ns-backdrop); }
+    @media (max-width:790px) {
+      /* On a phone the destinations become a labeled tab bar under the content. */
+      .cs-bar { order:2; justify-content:center; padding:.3rem max(.75rem,env(safe-area-inset-right)) max(.3rem,env(safe-area-inset-bottom)) max(.75rem,env(safe-area-inset-left)); color:var(--ns-muted); background:var(--ns-paper); border-top:1px solid var(--ns-line); }
+      .cs-name, #journey-button { display:none; }
+      .cs-tabs { display:grid; grid-template-columns:1fr 1fr; width:min(100%,24rem); padding:0; gap:.5rem; border:0; }
+      .cs-tabs button { flex-direction:column; gap:.15rem; justify-self:center; min-width:min(100%,7.5rem); min-height:50px; padding:.35rem .9rem; border-radius:14px; font:600 clamp(11px,.75rem,15px)/1.2 var(--ns-sans); }
+      .cs-tabs button[aria-selected=true] { background:var(--ns-accent-tint); color:var(--ns-accent); }
+      @media (hover: hover) { .cs-tabs button[aria-selected=false]:hover { background:var(--ns-fill); } }
+      .cs-tab-icon { display:block; width:24px; height:24px; }
+      .cs-tab-glyph { display:grid; place-items:center; font:500 19px/1 var(--ns-serif); letter-spacing:-.02em; }
+      .cs-bar :focus-visible { outline-color:var(--ns-focus); }
+    }
+    @media print { .cs-bar { display:none; } }
   </style>
 </head>
 <body>
   <main id="combined-studio" aria-label="Novel Studio">
     <header class="cs-bar">
       <span class="cs-name">Novel Studio</span>
-      <nav class="cs-tabs" role="tablist" aria-label="Study tools">
-        <button type="button" role="tab" id="lessons-tab" aria-selected="true" aria-controls="lessons-pane">Lessons</button>
-        <button type="button" role="tab" id="diction-tab" tabindex="-1" aria-selected="false" aria-controls="diction-pane">Vocabulary</button>
+      <nav class="cs-tabs" role="tablist" aria-label="Sections">
+        <button type="button" role="tab" id="lessons-tab" aria-selected="true" aria-controls="lessons-pane"><svg class="cs-tab-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.6c3.1-1 6-.6 9 1.5 3-2.1 5.9-2.5 9-1.5v12.8c-3.1-1-6-.6-9 1.5-3-2.1-5.9-2.5-9-1.5z"/><path d="M12 7.1v12.8"/></svg><span>Lessons</span></button>
+        <button type="button" role="tab" id="diction-tab" tabindex="-1" aria-selected="false" aria-controls="diction-pane"><span class="cs-tab-icon cs-tab-glyph" aria-hidden="true">Aa</span><span>Word tools</span></button>
       </nav>
       <button id="journey-button" type="button" aria-haspopup="dialog" aria-controls="learning-journey">Learning progress</button>
     </header>
@@ -47,14 +66,18 @@
   (() => {
     "use strict";
     const $ = id => document.getElementById(id);
+    const header = document.querySelector(".cs-bar");
     const tabs = {lessons:$("lessons-tab"), diction:$("diction-tab")};
     const panels = {lessons:$("lessons-pane"), diction:$("diction-pane")};
     const isTrack = track => track === "fiction" || track === "vocabulary";
     const isLesson = (track, id) => /^week-(?:[1-9]|1[0-9]|20)$/.test(id) || (track === "fiction" && id === "map");
+    // "Word tools" replaced the old "Vocabulary" destination. Earlier links keep working.
+    const isWordTools = hash => hash === "#word-tools" || hash === "#vocabulary";
     let active, lessonFrame, readerReady = false, dictionFrame, dictionary, wordRequest;
     let currentLesson, requested, queuedAction;
     const lastByTrack = {};
     const queues = {lessons:null, diction:null};
+    const waiting = [];
 
     function address(hash, replace = false) {
       if (location.hash !== hash) history[replace ? "replaceState" : "pushState"](null, "", hash);
@@ -68,6 +91,10 @@
         tab.tabIndex = selected ? 0 : -1;
         panels[key].hidden = !selected;
       }
+    }
+    function setModal(open) {
+      document.body.classList.toggle("ns-modal-open", open);
+      header.inert = open;
     }
     function sendLesson() {
       if (!readerReady || active !== "lessons" || !requested) return;
@@ -84,8 +111,8 @@
     function loadLessons(track,lesson) {
       lessonFrame = document.createElement("iframe");
       lessonFrame.title = "Fiction and vocabulary lessons";
-      lessonFrame.addEventListener("load", () => { readerReady = true; sendLesson(); });
-      lessonFrame.src = "lessons/index.html?v=3#" + track + (lesson ? "/" + lesson : "");
+      lessonFrame.addEventListener("load", () => { readerReady = true; setModal(false); sendLesson(); });
+      lessonFrame.src = "lessons/index.html?v=4#" + track + (lesson ? "/" + lesson : "");
       panels.lessons.append(lessonFrame);
     }
     function updateReview(kind, info) {
@@ -107,9 +134,21 @@
     function loadDiction() {
       if (dictionFrame) return;
       dictionFrame = document.createElement("iframe");
-      dictionFrame.title = "Diction vocabulary tools";
-      dictionFrame.src = "diction/index.html?v=3";
+      dictionFrame.title = "Word tools";
+      dictionFrame.src = "diction/index.html?v=4";
       panels.diction.append(dictionFrame);
+    }
+    // Word tools can answer a lesson's lookup without taking over the screen.
+    function withDictionary() {
+      if (dictionary) return Promise.resolve(dictionary);
+      loadDiction();
+      return new Promise((resolve, reject) => {
+        const entry = {resolve, timer:setTimeout(() => {
+          waiting.splice(waiting.indexOf(entry), 1);
+          reject(new Error("Word tools did not load."));
+        }, 30000)};
+        waiting.push(entry);
+      });
     }
     function showDiction(request) {
       wordRequest = request;
@@ -125,7 +164,8 @@
         url.searchParams.delete("activity");
         history.replaceState(null, "", url);
       }
-      if (location.hash === "#vocabulary") {
+      if (isWordTools(location.hash)) {
+        if (location.hash !== "#word-tools") address("#word-tools", true);
         showDiction(action === "review" ? {action:"review"} : undefined);
         return;
       }
@@ -135,10 +175,18 @@
       if (!match || (match[2] && !id)) address("#lessons/" + track,true);
       showLessons(track,id,action);
     }
+    function scrollToTop(name) {
+      const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (name === "lessons" && readerReady) lessonFrame.contentWindow.postMessage({type:"ns-scroll-top", smooth}, location.origin);
+      else if (name === "diction" && dictionFrame) {
+        try { dictionFrame.contentWindow.scrollTo({top:0, behavior:smooth ? "smooth" : "auto"}); } catch { /* not yet loaded */ }
+      }
+    }
     function select(name) {
-      if (name === active) return;
+      // As on iPhone, choosing the open destination again returns to its top.
+      if (name === active) { scrollToTop(name); return; }
       if (name === "diction") {
-        address("#vocabulary");
+        address("#word-tools");
         showDiction();
       } else {
         const {track, lesson} = currentLesson || {track:"vocabulary"};
@@ -151,9 +199,19 @@
       if (!lessonFrame || event.source !== lessonFrame.contentWindow || event.origin !== location.origin) return;
       const msg = event.data;
       if (msg?.type === "ns-review-status") { updateReview("lessons",msg); return; }
+      if (msg?.type === "ns-modal") { setModal(msg.open === true); return; }
       if (active !== "lessons") return;
+      if (msg?.type === "ns-open-progress") {
+        // Return focus to the lesson's progress button, where the reader opened the record.
+        $("learning-journey")?.addEventListener("close", () => {
+          lessonFrame.focus();
+          lessonFrame.contentWindow.postMessage({type:"ns-progress-closed"}, location.origin);
+        }, {once:true});
+        window.NovelJourney?.open();
+        return;
+      }
       if (msg?.type === "ns-lesson-workspace" && msg.workspace === "diction") {
-        address("#vocabulary");
+        address("#word-tools");
         const word = typeof msg.word === "string" ? msg.word.trim().slice(0,120) : "";
         showDiction(word ? {word} : null);
         tabs.diction.focus({preventScroll:true});
@@ -175,7 +233,7 @@
       if (action === "review" && !queues.lessons?.due && queues.diction) {
         const words = queues.diction;
         if (words.due || (words.nextDue && words.nextDue < (queues.lessons?.nextDue ?? Infinity))) {
-          address("#vocabulary");
+          address("#word-tools");
           showDiction({action:"review"});
           return;
         }
@@ -199,10 +257,21 @@
         if (name !== "diction" || !adapter) return;
         dictionary = adapter;
         try { localStorage.setItem("ns.diction.used","1"); } catch { /* progress may be session-only */ }
+        for (const entry of waiting.splice(0)) { clearTimeout(entry.timer); entry.resolve(dictionary); }
         if (dictionary.reviewStatus) updateReview("diction",dictionary.reviewStatus());
         syncDictionary();
       },
-      updateDictionReview(info) { updateReview("diction",info); }
+      updateDictionReview(info) { updateReview("diction",info); },
+      // A lesson keeps its passage in view and asks Word tools for definitions.
+      lookup(term) {
+        return withDictionary().then(words => {
+          if (!words.define) throw new Error("Lookup is unavailable.");
+          return words.define(term);
+        });
+      },
+      saveSense(word, sense, personal = false) {
+        return withDictionary().then(words => words.saveSense(word, sense, personal === true));
+      }
     };
     $("journey-button").addEventListener("click", () => {
       if (!lessonFrame) loadLessons("vocabulary");

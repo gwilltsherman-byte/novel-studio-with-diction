@@ -14,10 +14,11 @@
 
   let generation = 0;
   let current = null;
-  let selectionWord = "";
   let tableNumber = 0;
   let pending = null;
   let memory = {};
+  let sheetTrack = null;
+  let sheetTicket = 0;
   function readState() {
     try {
       const value = JSON.parse(localStorage.getItem(storageKey));
@@ -88,11 +89,19 @@
     const label = sideLabel(lesson);
     return label ? label + " · " + lessonName(lesson) : lessonName(lesson);
   }
-  function showList() {
-    const {track, lessons, lesson} = current;
+  function shortName(track, lesson) {
+    return tracks[track] + " · " + (sideLabel(lesson) || lessonName(lesson));
+  }
+  function completion(track, lessons) {
     const done = doneSet();
-    const nav = document.createDocumentFragment(), options = document.createDocumentFragment();
-    let previousGroup, list, group;
+    const count = lessons.filter(item => done.has(selectedKey(track, item.id))).length;
+    return count + " of " + lessons.length + " lessons completed";
+  }
+  // One list builder serves the library sidebar and the course sheet.
+  function lessonList(track, lessons, currentId, inSheet) {
+    const done = doneSet();
+    const nav = document.createDocumentFragment();
+    let previousGroup, list;
     for (const item of lessons) {
       const category = item.group || (/^week[- ]?\d+/i.test(item.id) ? "Weekly lessons" : "Course materials");
       if (previousGroup !== category) {
@@ -100,16 +109,15 @@
         heading.className = "group-title";
         list = element("ul");
         nav.append(heading, list);
-        group = element("optgroup");
-        group.label = category;
-        options.append(group);
         previousGroup = category;
       }
       const completed = done.has(selectedKey(track, item.id));
       const li = element("li"), link = element("a");
       link.href = address(track, item.id);
       link.dataset.lesson = item.id;
-      if (item.id === lesson.id) link.setAttribute("aria-current", "page");
+      link.dataset.track = track;
+      if (inSheet) link.setAttribute("data-dismiss", "");
+      if (item.id === currentId) link.setAttribute("aria-current", "page");
       if (sideLabel(item)) {
         const label = element("span", sideLabel(item));
         label.className = "lesson-label";
@@ -127,21 +135,54 @@
       }
       li.append(link);
       list.append(li);
-      const option = element("option", (completed ? "✓ " : "") + fullName(item));
-      option.value = item.id;
-      group.append(option);
     }
-    $("lesson-list").replaceChildren(nav);
-    $("lesson-picker").replaceChildren(options);
-    $("lesson-picker").value = lesson.id;
-    $("mobile-picker").hidden = false;
-    const count = lessons.filter(item => done.has(selectedKey(track, item.id))).length;
-    $("progress").textContent = count + " of " + lessons.length + " completed";
+    return nav;
+  }
+  function showList() {
+    const {track, lessons, lesson} = current;
+    $("lesson-list").replaceChildren(lessonList(track, lessons, lesson.id, false));
+    const summary = completion(track, lessons);
+    $("progress").textContent = summary;
     $("progress").hidden = false;
-    const marked = done.has(selectedKey(track, lesson.id));
+    $("course-progress").textContent = tracks[track] + ": " + summary + ".";
+    const label = shortName(track, lesson);
+    $("course-label").textContent = label;
+    $("course-button").setAttribute("aria-label", label + ", choose a lesson");
+    $("course-button").hidden = false;
+    const marked = doneSet().has(selectedKey(track, lesson.id));
     $("complete").setAttribute("aria-pressed", String(marked));
     $("complete-label").textContent = marked ? "Completed" : "Mark complete";
+    if (courseSheet.isOpen) showSheetTrack(sheetTrack);
   }
+
+  // The course sheet holds both courses and every week: one selector instead of two.
+  const courseSheet = window.NovelSheet.setup($("course-sheet"), {
+    onOpen() { showSheetTrack(current?.track || "fiction", true); }
+  });
+  async function showSheetTrack(track, reveal = false) {
+    sheetTrack = track;
+    const ticket = ++sheetTicket;
+    for (const button of document.querySelectorAll("[data-sheet-track]")) {
+      button.setAttribute("aria-pressed", String(button.dataset.sheetTrack === track));
+    }
+    let lessons;
+    try { ({lessons} = await course(track)); }
+    catch {
+      if (ticket !== sheetTicket) return;
+      $("sheet-list").replaceChildren(element("p", "This course could not be loaded. Check your connection and try again."));
+      $("sheet-progress").textContent = "";
+      return;
+    }
+    if (ticket !== sheetTicket) return;
+    const currentId = current?.track === track ? current.lesson.id : null;
+    $("sheet-list").replaceChildren(lessonList(track, lessons, currentId, true));
+    $("sheet-progress").textContent = completion(track, lessons) + ".";
+    if (reveal) $("sheet-list").querySelector("[aria-current]")?.scrollIntoView({block: "center"});
+  }
+  document.querySelectorAll("[data-sheet-track]").forEach(button => button.addEventListener("click", () => {
+    showSheetTrack(button.dataset.sheetTrack, true);
+  }));
+  $("course-button").addEventListener("click", event => courseSheet.open(event.currentTarget));
 
   function safeLink(raw, label) {
     let url;
@@ -257,7 +298,6 @@
     return output;
   }
   function showText() {
-    selectionWord = "";
     $("look-up").hidden = true;
     tableNumber = 0;
     const pages = current.lesson.pages || [];
@@ -289,6 +329,7 @@
     if (lesson) {
       link.href = address(current.track, lesson.id);
       link.dataset.lesson = lesson.id;
+      link.dataset.track = current.track;
       link.querySelector("strong").textContent = fullName(lesson);
     } else {
       link.removeAttribute("href");
@@ -299,7 +340,7 @@
     const {track, lesson, lessons} = current;
     const index = lessons.indexOf(lesson);
     const trackName = tracks[track];
-    for (const button of document.querySelectorAll("[data-track]")) {
+    for (const button of document.querySelectorAll("[data-track]:not(a)")) {
       button.setAttribute("aria-pressed", String(button.dataset.track === track));
     }
     $("lesson-title").textContent = lessonName(lesson);
@@ -316,12 +357,10 @@
     const originals = $("lesson-originals");
     originals.dataset.track = track;
     originals.dataset.lesson = lesson.id;
-    window.dispatchEvent(new CustomEvent("ns-lesson-rendered", {detail: {track, lesson: lesson.id}}));
+    window.dispatchEvent(new CustomEvent("ns-lesson-rendered", {detail: {track, lesson: lesson.id, title: lessonName(lesson), label: sideLabel(lesson)}}));
     if (focus) {
       $("lesson-title").focus({preventScroll: true});
-      const narrow = matchMedia("(max-width: 790px)").matches;
-      if (narrow) $("reading").scrollIntoView({block: "start"});
-      else window.scrollTo(0, 0);
+      window.scrollTo(0, 0);
     }
   }
   async function open(track, requested, {push = false, focus = false, action} = {}) {
@@ -357,12 +396,12 @@
   document.querySelectorAll("button[data-track]").forEach(button => button.addEventListener("click", () => {
     open(button.dataset.track, null, {push: true});
   }));
-  $("lesson-picker").addEventListener("change", event => open(current.track, event.target.value, {push: true, focus: true}));
   document.addEventListener("click", event => {
     const link = event.target.closest("a[data-lesson]");
     if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
-    open(current.track, link.dataset.lesson, {push: true, focus: true});
+    window.NovelWorkbook?.closeDraft({quiet: true});
+    open(link.dataset.track || current?.track, link.dataset.lesson, {push: true, focus: true});
   });
   document.querySelector(".skip").addEventListener("click", event => {
     event.preventDefault();
@@ -378,30 +417,6 @@
     writeState(state, true);
     showList();
   });
-  function selectedTerm() {
-    const selection = window.getSelection();
-    const body = $("article");
-    if (!selection || selection.isCollapsed || !body.contains(selection.anchorNode) || !body.contains(selection.focusNode)) return "";
-    const term = selection.toString().trim().replace(/\s+/g, " ");
-    return term && term.length <= 120 && term.split(" ").length <= 10 ? term : "";
-  }
-  if (embedded) {
-    const lookup = $("look-up");
-    document.addEventListener("selectionchange", () => {
-      const term = selectedTerm();
-      if (!term && document.activeElement === lookup) return;
-      selectionWord = term;
-      lookup.hidden = !term;
-    });
-    lookup.addEventListener("pointerdown", event => event.preventDefault());
-    lookup.addEventListener("click", () => {
-      if (!selectionWord) return;
-      notify({type: "ns-lesson-workspace", workspace: "diction", word: selectionWord});
-      lookup.hidden = true;
-      selectionWord = "";
-      window.getSelection()?.removeAllRanges();
-    });
-  }
   $("workspace").addEventListener("click", event => {
     if (!embedded || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
@@ -414,9 +429,12 @@
     if (!embedded || event.source !== window.parent || event.origin !== location.origin) return;
     const data = event.data;
     if (data?.type === "ns-open-lesson" && isTrack(data.track)) open(data.track, data.lesson, {action:data.action});
+    // Choosing Lessons again in the tab bar returns to the top, as on iPhone.
+    if (data?.type === "ns-scroll-top") window.scrollTo({top: 0, behavior: data.smooth ? "smooth" : "auto"});
   });
   window.addEventListener("hashchange", followHash);
   window.addEventListener("popstate", followHash);
   window.addEventListener("storage", event => { if (event.key === storageKey && current) showList(); });
+  window.NovelReader = {current: () => current, lessonName, shortName};
   followHash();
 })();

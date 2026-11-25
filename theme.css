@@ -1,0 +1,63 @@
+/* Novel Studio theme: ink green and ivory, with a matching dark palette.
+   Tokens carry an ns- prefix so they never collide with Diction's own variables. */
+:root {
+  color-scheme: light dark;
+  --ns-paper: #fbfaf4;
+  --ns-surface: #fffef9;
+  --ns-pane: #f0efe4;
+  --ns-fill: #edf0e5;
+  --ns-fill-strong: #e2e8da;
+  --ns-line: #d3d6c9;
+  --ns-line-strong: #a5b09e;
+  --ns-text: #29302a;
+  --ns-ink: #1f3529;
+  --ns-muted: #566052;
+  --ns-accent: #244635;
+  --ns-accent-strong: #172d22;
+  --ns-on-accent: #fffdf3;
+  --ns-accent-tint: #e1e9da;
+  --ns-thumb: #fffefa;
+  --ns-copper: #9a6630;
+  --ns-focus: #8a6a1c;
+  --ns-chrome: #20362b;
+  --ns-chrome-text: #faf8e9;
+  --ns-chrome-line: #6d8170;
+  --ns-chrome-hover: #344b3e;
+  --ns-chrome-selected: #f0efd9;
+  --ns-chrome-focus: #e9ca85;
+  --ns-bar: rgb(251 250 244 / .9);
+  --ns-backdrop: rgb(17 37 28 / .38);
+  --ns-shadow: 0 1px 2px rgb(20 45 36 / .06), 0 10px 30px rgb(20 45 36 / .12);
+  --ns-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --ns-sans: "Avenir Next", Avenir, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ns-paper: #0f1a15;
+    --ns-surface: #15221c;
+    --ns-pane: #131f19;
+    --ns-fill: #1a2922;
+    --ns-fill-strong: #22342b;
+    --ns-line: #2b3c33;
+    --ns-line-strong: #4f6357;
+    --ns-text: #e3e0d2;
+    --ns-ink: #f2eedd;
+    --ns-muted: #a4ae9f;
+    --ns-accent: #9fd0b6;
+    --ns-accent-strong: #bfe3cf;
+    --ns-on-accent: #0c1d15;
+    --ns-accent-tint: #1f392c;
+    --ns-thumb: #33493d;
+    --ns-copper: #d9a666;
+    --ns-focus: #e3c46d;
+    --ns-chrome: #14221b;
+    --ns-chrome-text: #ece9da;
+    --ns-chrome-line: #3d5245;
+    --ns-chrome-hover: #203328;
+    --ns-chrome-selected: #e9e6d2;
+    --ns-chrome-focus: #e3c46d;
+    --ns-bar: rgb(15 26 21 / .9);
+    --ns-backdrop: rgb(0 0 0 / .55);
+    --ns-shadow: 0 1px 2px rgb(0 0 0 / .3), 0 12px 32px rgb(0 0 0 / .45);
+  }
+}

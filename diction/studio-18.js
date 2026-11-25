@@ -39,6 +39,33 @@
     }
     return lo;
   }
+  // One lookup serves the quick-lookup dialog here and the definition sheet inside a lesson.
+  let lookupIndex, lookupDefined=[];
+  D.lookupTerm = (query,limit=5) => {
+    const term=fold(query),data=D.dictionaryData;
+    const found={word:'',senses:[],suggestions:[]};
+    if(!term || !data)return found;
+    if(data.definedHeadwords!==lookupIndex) {
+      lookupIndex=data.definedHeadwords;
+      lookupDefined=(lookupIndex||[]).slice().sort((a,b)=>fold(a)<fold(b)?-1:fold(a)>fold(b)?1:0);
+    }
+    const full=data.headwords,at=lower(full,term);
+    if(at<full.length&&fold(full[at])===term)found.word=full[at];
+    const personal=D.state.notes.filter(n=>n.personalMeaning&&fold(n.word)===term&&n.sense);
+    if(!found.word&&personal.length)found.word=personal[0].word;
+    const unique=new Set([term]);
+    for(const words of [lookupDefined,full]){
+      for(let i=lower(words,term);i<words.length&&found.suggestions.length<limit;i++){
+        const key=fold(words[i]);
+        if(!key.startsWith(term))break;
+        if(!unique.has(key)){unique.add(key);found.suggestions.push(words[i]);}
+      }
+    }
+    if(found.word)found.senses=data.lookup(found.word).filter(s=>typeof s?.definition==='string' && s.definition.trim()).map(s=>({...s,definition:s.definition.trim(),source:s.source||data.source}));
+    for(const n of personal)found.senses.push({definition:n.sense,source:'Writer’s own meaning',pos:''});
+    return found;
+  };
+  D.savedDictionarySense = savedSense;
   D.initQuickLookup = mount => {
     if(mount?.nodeType===9)mount=mount.body;
     const trigger=mount?.querySelector('#quick-lookup-open');
@@ -56,7 +83,7 @@
     mount.append(scrim,dialog);
     const input=dialog.querySelector('#ql-query'), results=dialog.querySelector('#ql-results'), status=dialog.querySelector('#ql-status');
     const form=dialog.querySelector('#ql-form'), closeButton=dialog.querySelector('#ql-close');
-    let origin,pointerOrigin,inside=false,active=false,native=false,composing=false,index,defined=[],word='',senses=[],suggestions=[],limit=3,notesChanged=false;
+    let origin,pointerOrigin,inside=false,active=false,native=false,composing=false,word='',senses=[],suggestions=[],limit=3,notesChanged=false;
     const inertSiblings=[];
     function remember() {
       const el=document.activeElement;
@@ -72,28 +99,10 @@
     }
     function update() {
       if(form.hidden)return;
-      const term=fold(input.value),data=D.dictionaryData;
       word='';senses=[];suggestions=[];
-      if(!term || !data){results.innerHTML='';status.textContent='';return;}
-      if(data.definedHeadwords!==index) {
-        index=data.definedHeadwords;
-        defined=(index||[]).slice().sort((a,b)=>fold(a)<fold(b)?-1:fold(a)>fold(b)?1:0);
-      }
-      const full=data.headwords,at=lower(full,term);
-      if(at<full.length&&fold(full[at])===term)word=full[at];
-      const personal=D.state.notes.filter(n=>n.personalMeaning&&fold(n.word)===term&&n.sense);
-      if(!word&&personal.length)word=personal[0].word;
-      const unique=new Set([term]);
-      for(const words of [defined,full]){
-        for(let i=lower(words,term);i<words.length&&suggestions.length<5;i++){
-          const key=fold(words[i]);
-          if(!key.startsWith(term))break;
-          if(!unique.has(key)){unique.add(key);suggestions.push(words[i]);}
-        }
-      }
+      if(!fold(input.value) || !D.dictionaryData){results.innerHTML='';status.textContent='';return;}
+      ({word,senses,suggestions}=D.lookupTerm(input.value));
       const esc=D.esc;
-      if(word)senses=data.lookup(word).filter(s=>typeof s?.definition==='string' && s.definition.trim()).map(s=>({...s,definition:s.definition.trim(),source:s.source||data.source}));
-      for(const n of personal)senses.push({definition:n.sense,source:'Writer’s own meaning',pos:''});
       results.innerHTML=(word?'<h3>'+esc(word)+'</h3>':'')+
         (senses.length?'<ol class="ql-senses">'+senses.slice(0,limit).map((s,i)=>{
           const saved=savedSense(word,s);
