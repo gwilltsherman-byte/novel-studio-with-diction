@@ -16,7 +16,7 @@
     const lesson = standalone === "lessons" ? studyLocation() : null;
     if (action) target.searchParams.set("activity",action);
     if (standalone === "diction" && (!action || (action === "review" && window.Diction?.reviewStatus?.().due > 0))) {
-      target.hash = "vocabulary";
+      target.hash = "word-tools";
     } else {
       const id = lesson?.[1] === track && (track === "fiction" || lesson[2] !== "map") ? "/" + lesson[2] : "";
       target.hash = "lessons/" + track + id;
@@ -106,7 +106,7 @@
   const skills = {recall:"Recall",compare:"Distinguish",apply:"Apply"};
 
   function currentTrack() {
-    return standalone === "diction" || /#(?:lessons\/)?vocabulary(?:\/|$)/.test(location.hash) ? "vocabulary" : "fiction";
+    return standalone === "diction" || /^#(?:word-tools|vocabulary)$|^#(?:lessons\/)?vocabulary(?:\/|$)/.test(location.hash) ? "vocabulary" : "fiction";
   }
 
   function start(action, track) {
@@ -290,6 +290,8 @@
   window.addEventListener("focus", refresh);
   document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(); });
   window.NovelJourney = {
+    // The phone layout opens progress from a lesson's compact menu.
+    open() { trigger.click(); },
     setReviewStatus(value) {
       scheduled = value;
       render(snapshot);

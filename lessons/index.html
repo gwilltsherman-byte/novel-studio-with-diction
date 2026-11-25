@@ -3,22 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#20362b">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fbfaf4">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f1a15">
   <title>Lessons · Novel Studio</title>
-  <link rel="stylesheet" href="reader.css">
-  <link rel="stylesheet" href="study.css?v=3">
-  <link rel="stylesheet" href="milestones.css?v=1">
+  <link rel="stylesheet" href="../theme.css?v=1">
+  <link rel="stylesheet" href="reader.css?v=4">
+  <link rel="stylesheet" href="study.css?v=4">
+  <link rel="stylesheet" href="sheets.css?v=1">
+  <link rel="stylesheet" href="workbook.css?v=1">
+  <link rel="stylesheet" href="../journey.css?v=2">
   <script defer src="../learning.js?v=1"></script>
-  <script defer src="../journey.js?v=1"></script>
-  <script defer src="openers.js"></script>
+  <script defer src="../journey.js?v=2"></script>
+  <script defer src="sheet.js?v=1"></script>
+  <script defer src="openers.js?v=2"></script>
   <script defer src="schedule.js?v=3"></script>
   <script defer src="practice.js?v=3"></script>
-  <script defer src="workbook.js?v=3"></script>
-  <script defer src="study.js?v=3"></script>
-  <script defer src="milestones.js?v=1"></script>
-  <script defer src="reader.js?v=3"></script>
+  <script defer src="workbook.js?v=4"></script>
+  <script defer src="study.js?v=4"></script>
+  <script defer src="milestones.js?v=2"></script>
+  <script defer src="reader.js?v=4"></script>
+  <script defer src="lookup.js?v=1"></script>
   <script defer src="originals.js"></script>
-  <link rel="stylesheet" href="../journey.css?v=1">
 </head>
 <body>
   <a class="skip" href="#lesson-title">Skip to lesson</a>
@@ -31,22 +36,28 @@
           <button type="button" data-track="vocabulary" aria-pressed="false">Vocabulary</button>
         </div>
         <p id="progress" class="progress" hidden></p>
-        <button type="button" id="due-review" class="due-review">Review both courses <span id="due-count"></span></button>
-        <p id="due-detail" class="due-detail" hidden></p>
-        <div class="mobile-picker" id="mobile-picker" hidden>
-          <label for="lesson-picker">Choose a lesson</label>
-          <select id="lesson-picker"></select>
-        </div>
       </header>
       <nav id="lesson-list" class="lesson-list" aria-label="Lessons in this course"></nav>
     </aside>
     <main id="reading">
+      <header class="app-bar">
+        <p class="app-name">Novel Studio</p>
+        <button type="button" id="course-button" class="course-pill" aria-haspopup="dialog" aria-controls="course-sheet" hidden><span id="course-label">Lessons</span><svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m4 6 4 4 4-4"/></svg></button>
+      </header>
       <div id="notice" class="notice" role="status">Loading lessons…</div>
       <button id="retry" class="secondary" type="button" hidden>Try again</button>
       <article id="article" hidden>
         <header class="article-head">
           <p id="context" class="context"></p>
-          <h1 id="lesson-title" tabindex="-1"></h1>
+          <div class="title-row">
+            <h1 id="lesson-title" tabindex="-1"></h1>
+            <button type="button" id="progress-button" class="progress-ring" aria-haspopup="dialog" aria-controls="progress-sheet">
+              <svg aria-hidden="true" viewBox="0 0 32 32"><g class="ring-segments" fill="none" stroke-width="3" stroke-linecap="round"></g></svg>
+              <span class="ring-badge" id="ring-badge" aria-hidden="true" hidden></span>
+              <span class="ring-gain" id="ring-gain" aria-hidden="true"></span>
+              <span class="vh" id="progress-button-label">Progress and milestones</span>
+            </button>
+          </div>
         </header>
         <nav class="study-modes" aria-label="Lesson views">
           <button type="button" data-view="learn" aria-pressed="true">Guided lesson</button>
@@ -60,18 +71,69 @@
           <section id="lesson-originals" aria-label="Original lesson PDF"></section>
         </div>
         <div class="tools reader-tools">
-          <a id="workspace" class="workspace" href="../#vocabulary">Open Diction</a>
           <button id="complete" class="complete" type="button" aria-pressed="false"><span class="check" aria-hidden="true"></span><span id="complete-label">Mark complete</span></button>
           <button type="button" id="jump-original" class="workspace">Original PDF</button>
+          <a id="workspace" class="workspace wide-only" href="../#word-tools">Open Word tools</a>
         </div>
         <nav class="turn" aria-label="Previous and next lessons">
           <a id="prev" rel="prev" hidden><span>Previous lesson</span><strong></strong></a>
           <a id="next" rel="next" hidden><span>Next lesson</span><strong></strong></a>
         </nav>
       </article>
+      <section id="draft-screen" class="draft-screen" aria-labelledby="draft-title" hidden></section>
       <p id="storage-status" role="status" hidden></p>
     </main>
   </div>
-  <button id="look-up" class="selection-action" type="button" hidden>Look up selection in Diction</button>
+  <button id="look-up" class="selection-action" type="button" hidden><span id="look-up-label">Look up</span></button>
+
+  <dialog id="course-sheet" class="sheet" aria-labelledby="course-sheet-title">
+    <div class="sheet-head">
+      <h2 id="course-sheet-title">Choose a lesson</h2>
+      <button type="button" class="sheet-done" data-dismiss>Done</button>
+    </div>
+    <div class="sheet-body">
+      <div class="segmented" role="group" aria-label="Course">
+        <button type="button" data-sheet-track="fiction" aria-pressed="true">Fiction</button>
+        <button type="button" data-sheet-track="vocabulary" aria-pressed="false">Vocabulary</button>
+      </div>
+      <p id="sheet-progress" class="sheet-note" aria-live="polite"></p>
+      <nav id="sheet-list" class="lesson-list sheet-list" aria-label="Lessons in this course"></nav>
+    </div>
+  </dialog>
+
+  <dialog id="progress-sheet" class="sheet" aria-labelledby="progress-sheet-title" data-anchor>
+    <div class="sheet-head">
+      <h2 id="progress-sheet-title">Progress</h2>
+      <button type="button" class="sheet-done" data-dismiss>Done</button>
+    </div>
+    <div class="sheet-body">
+      <section class="menu-section" aria-labelledby="milestones-title">
+        <h3 id="milestones-title" class="menu-heading">Lesson milestones</h3>
+        <ul id="milestone-list" class="milestone-list"></ul>
+      </section>
+      <section class="menu-section" aria-label="Review">
+        <button type="button" id="due-review" class="menu-row" data-dismiss>Review both courses <span id="due-count"></span></button>
+        <p id="due-detail" class="due-detail" hidden></p>
+      </section>
+      <section class="menu-section" aria-label="Your record">
+        <p id="course-progress" class="menu-note"></p>
+        <button type="button" id="open-journey" class="menu-row" data-dismiss><span>Learning progress</span><span id="journey-summary" class="menu-detail"></span></button>
+      </section>
+    </div>
+  </dialog>
+
+  <dialog id="lookup-sheet" class="sheet lookup-sheet" aria-labelledby="lookup-title">
+    <div class="sheet-head">
+      <h2 id="lookup-title">Look up</h2>
+      <button type="button" class="sheet-done" data-dismiss>Done</button>
+    </div>
+    <div class="sheet-body">
+      <div id="lookup-results"></div>
+      <p id="lookup-status" class="sheet-note" role="status"></p>
+      <div class="sheet-actions">
+        <button type="button" id="lookup-open" class="sheet-link" data-dismiss>Open in Word tools</button>
+      </div>
+    </div>
+  </dialog>
 </body>
 </html>

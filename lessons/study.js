@@ -116,17 +116,26 @@
     }
     detail.textContent = note;
     detail.hidden = !note;
+    window.dispatchEvent(new CustomEvent("ns-review-due", {detail:{due:info.globalDue, nextDue:info.nextDue, note}}));
     clearTimeout(dueTimer);
     if (info.nextDue) dueTimer = setTimeout(refreshReview, Math.max(1000, Math.min(2147000000, info.nextDue - Date.now() + 500)));
   }
 
+  // Underline the exact phrase the answer turns on. Returns false when the text lacks it.
+  function annotate(target, text, phrase) {
+    const at = phrase ? text.indexOf(phrase) : -1;
+    if (at < 0) return false;
+    target.replaceChildren(text.slice(0, at), node("mark", phrase, "annotation"), text.slice(at + phrase.length));
+    return true;
+  }
   function opener(root, moveFocus) {
-    const [title, scene, question, left, right, explanation, correct] = window.LessonOpeners[current.track][current.lesson.id];
+    const [title, scene, question, left, right, explanation, correct, phrase] = window.LessonOpeners[current.track][current.lesson.id];
     const card = node("section", null, "opening-card");
     const heading = node("h2", title);
     const passage = node("blockquote", scene);
     const prompt = node("h3", question);
     const choices = node("div", null, "opening-choices");
+    choices.setAttribute("role", "group");
     const response = node("div", null, "opening-response");
     response.hidden = true;
     function choose(answer) {
@@ -135,22 +144,39 @@
         track:current.track, grade:answer === correct ? "good" : "again"
       });
       for (const el of choices.children) {
+        const index = Number(el.dataset.choice);
         el.disabled = true;
-        el.classList.toggle("correct-choice", Number(el.dataset.choice) === correct);
+        el.classList.toggle("correct-choice", index === correct);
+        el.classList.toggle("chosen", index === answer);
+        const notes = [index === correct ? "correct answer" : "", index === answer ? "your answer" : ""].filter(Boolean);
+        if (notes.length) el.append(node("span", ", " + notes.join(", "), "vh"));
       }
-      response.hidden = false;
-      const result = node("h4", answer === correct ? "Exactly." : "Look at the other choice.");
+      // The phrase sits in the passage when the scene holds the answer, otherwise in the right choice.
+      let anchor = passage;
+      if (!annotate(passage, scene, phrase)) {
+        anchor = choices;
+        const text = choices.querySelector('[data-choice="' + correct + '"] .choice-text');
+        if (text) annotate(text, items[correct], phrase);
+      }
+      const hint = anchor === passage ? "Look again at the underlined phrase." : "Look at the other choice.";
+      const result = node("h4", answer === correct ? "Exactly." : hint);
       response.replaceChildren(result, node("p", explanation));
+      anchor.after(response);
+      response.hidden = false;
       focus(result);
       next.textContent = "Continue lesson";
     }
     const items = [left,right];
     const order = Math.random() < .5 ? [0,1] : [1,0];
     for (const i of order) {
-      const choice = button(items[i], "opening-choice", () => choose(i));
+      const choice = button("", "opening-choice", () => choose(i));
       choice.dataset.choice = String(i);
+      const mark = node("span", null, "choice-mark");
+      mark.setAttribute("aria-hidden", "true");
+      choice.append(mark, node("span", items[i], "choice-text"));
       choices.append(choice);
     }
+    choices.setAttribute("aria-label", question);
     const next = button("Read the lesson", "study-link", () => goStep(1));
     card.append(node("p", "Opening exercise", "study-kicker"), heading, passage, prompt, choices, response, next);
     root.append(card);
@@ -250,7 +276,7 @@
     } else actions.append(advanceButton());
     actions.append(button("Previous section","study-link",() => goStep(step-1)));
     container.append(header,reading);
-    window.NovelWorkbook?.append(container,{track:current.track,lessonId:current.lesson.id,unit});
+    window.NovelWorkbook?.append(container,{track:current.track,lessonId:current.lesson.id,lesson:current.lesson,unit});
     container.append(actions);
     picker(container);
     if (moveFocus) focus(title);
@@ -262,7 +288,6 @@
     $("source-pane").hidden = mode !== "text";
     work.hidden = mode === "text";
     $("return-practice").hidden = !returnFromSource;
-    $("due-review").setAttribute("aria-pressed", String(mode === "review"));
     $("look-up").hidden = true;
   }
   async function openSource(source, origin) {
@@ -275,6 +300,8 @@
   }
   async function show(mode, moveFocus = false) {
     const ticket = ++generation;
+    // A draft is saved as it is written; any change of view returns to the lesson.
+    window.NovelWorkbook?.closeDraft({quiet: true});
     dispose();
     setView(mode);
     if (mode === "text") {

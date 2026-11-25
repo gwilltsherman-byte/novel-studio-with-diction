@@ -1,0 +1,95 @@
+/* Diction in Dark Mode: ink green and ivory, inverted to match Novel Studio.
+   Literal colours from the studio-*.css files are remapped by role (surface, text, rule, shadow);
+   the hero card is already dark and keeps its colours. */
+@media (prefers-color-scheme: dark) {
+  :root{color-scheme:dark;--paper:#0f1a15;--white:#16241d;--ink:#f2eedd;--green:#9fd0b6;--muted:#a4ae9f;--line:#2b3c33;--brass:#d9a666}
+  /* Text on the accent fill reads dark, as on Novel Studio's primary buttons. */
+  .primary,.dict-browse button[aria-pressed=true]{color:#0c1d15}
+  .primary:hover{background:#bfe3cf;border-color:#bfe3cf}
+  button{background:var(--white)}
+  /* Small indicators take the accent so they stay visible on a dark page. */
+  nav a[aria-current]:after,.brand-glyph i,.journey-now:before{background:#9fd0b6}
+  .journey-progress progress::-webkit-progress-value{background:#9fd0b6}
+  .journey-progress progress::-moz-progress-bar{background:#9fd0b6}
+  /* studio-1.css */
+  button:hover{border-color:#4f6357}
+  button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #d9a666}
+  .brand{color:#9fd0b6}
+  .brand-period{color:#d9a666}
+  nav a{color:#a4ae9f}
+  nav a:hover{color:#9fd0b6}
+  nav a[aria-current]{color:#9fd0b6}
+  .eyebrow{color:#a4ae9f}
+  .section-line>svg{color:#a4ae9f}
+  .track-card:hover{background:#1b2a23;border-color:#4f6357}
+  .track-mark{color:#a4ae9f;background:#1b2a23}
+  .track-1 .track-mark{background:#1b2a23;color:#d9a666}
+  .track-2 .track-mark{background:#1b2a23;color:#a4ae9f}
+  .queue{border-top:3px solid #4f6357;background:#1b2a23}
+  .queue-heading{color:#a4ae9f}
+  .queue p{color:#a4ae9f}
+  .secondary{border:1px solid #4f6357}
+  input:not([type=checkbox]):not([type=radio]),select,textarea{background:#16241d;border:1px solid #4f6357}
+  ::placeholder{color:#a4ae9f}
+  .notice{background:#1b2a23;border-left:3px solid #9fd0b6;color:#a4ae9f}
+  #storage-message{color:#efc9a6;background:#33281d}
+  /* studio-3.css */
+  .lx-search input{border:1px solid #2b3c33;background:#16241d;color:#f2eedd}
+  .lx-search-icon{border:1.6px solid #4f6357}
+  .lx-search-icon:after{border-top:1.6px solid #4f6357}
+  .lx-filters button{color:#a4ae9f}
+  .lx-filters button[aria-pressed=true]{color:#9fd0b6;background:#1b2a23;border-color:#2b3c33}
+  .lx-filters button:hover{background:#1b2a23}
+  .lx-count,.lx-caption{color:#a4ae9f}
+  .lx-card,.lx-note{background:#16241d;color:#f2eedd;border:1px solid #2b3c33}
+  .lx-card:hover,.lx-note:hover{border-color:#4f6357;background:#1b2a23}
+  .lx-card-title,.lx-answer-word,.lx-near{color:#f2eedd}
+  .lx-card-body{color:#a4ae9f}
+  .lx-tag{color:#a4ae9f}
+  .lx-back,.lx-link{color:#a4ae9f}
+  .lx-back{border-bottom:1px solid #4f6357}
+  .lx-sheet blockquote{border-left:2px solid #4f6357;color:#f2eedd}
+  .lx-near i{color:#a4ae9f}
+  .lx-empty-mark{color:#a4ae9f}
+  .lx-note-list{border-top:1px solid #2b3c33}
+  .lx-confirm{background:#1b2a23;color:#f2eedd}
+  .lx-field input,.lx-field textarea{border:1px solid #2b3c33;color:#f2eedd;background:#16241d}
+  .lx-answer{border-top:1px solid #2b3c33;border-bottom:1px solid #2b3c33}
+  /* studio-4.css */
+  .pg-view{--pg-ink:#f2eedd;--pg-fine:#2b3c33;--pg-muted:#a4ae9f;color:#f2eedd}
+  .pg-stats{background:#1b2a23}
+  .pg-ready{background:#1b2a23}
+  .pg-blank .pg-pilcrow{color:#d9a666}
+  .pg-rows{background:#16241d}
+  .pg-entry>summary:hover{background:#1b2a23}
+  .pg-passage{background:#1b2a23;border:1px solid #2b3c33}
+  .pg-comparison .pg-passage:nth-child(2){background:#1b2a23;border-color:#2b3c33}
+  /* studio-5.css */
+  .pk-tabs button[aria-pressed=true]{background:#1b2a23;border-color:#2b3c33}
+  .pk-tile:hover{background:#1b2a23}
+  .pk-desc{color:#a4ae9f}
+  .pk-panel blockquote,.pk-journal blockquote{border-left:3px solid #4f6357}
+  .pk-panel input,.pk-panel textarea{background:#16241d}
+  .pk-view summary:focus-visible{outline:3px solid #d9a666}
+  .pk-tile:hover{border-color:#4f6357}
+  /* studio-6.css */
+  .dict-catalog{background:#1b2a23;border:1px solid #2b3c33}
+  .dict-grid button:hover,.dict-grid button:focus-visible{background:#1b2a23}
+  /* studio-8.css */
+  .desk-journey{background:#1b2a23;border:1px solid #2b3c33}
+  .desk-journey:hover{background:#1b2a23}
+  .journey-progress progress{background:#23362c}
+  .journey-progress progress::-webkit-progress-bar{background:#23362c}
+  .journey-progress progress::-webkit-progress-value{background:#4f6357}
+  .journey-progress progress::-moz-progress-bar{background:#4f6357}
+  .journey-step{border-left:2px solid #2b3c33}
+  .journey-step:before{border:2px solid #4f6357}
+  .journey-now:before{border-color:#9fd0b6;box-shadow:0 0 0 3px var(--paper),0 0 0 4px #00000073}
+  .journey-past:before{background:#4f6357}
+  .journey-now>.eyebrow{color:#a4ae9f}
+  .journey-words li{border:1px solid #4f6357}
+  /* studio-10.css */
+  .ql-dialog{box-shadow:0 15px 60px #0000004d}
+  .ql-dialog::backdrop,.ql-scrim{background:#00000090}
+  .ql-scrim{background:#00000090}
+}
